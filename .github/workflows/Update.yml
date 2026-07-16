@@ -2,32 +2,45 @@ name: Auto IPTV Update
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * *'
+    # 每日 北京时间 02:00 执行更新
+    - cron: '0 18 * * *'
 env:
   TZ: Asia/Shanghai
+
 jobs:
   Update:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: 拉取仓库代码
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: 安装Python依赖
         run: pip install requests urllib3
+
       - name: 执行分拣脚本
         run: python3 auto_iptv.py
-      - name: 提交更新文件
+
+      - name: 正常提交文件变更
         run: |
           git config --local user.name Bot
           git config --local user.email bot@github.com
           git add .
           git commit -m "$(date '+%Y-%m-%d %H:%M:%S') 自动更新iptv" || true
-          git push -f origin master
-      # ========== 新增：清理历史提交，仅保留当前最新快照 ==========
-      - name: 精简Git历史（清理旧记录）
+          git push origin master
+
+      # 【仅每周日执行】清理全部Git历史，保留最新快照
+      - name: 每周日精简提交历史
+        if: github.event.schedule == '0 19 * * 0'
         run: |
-          git checkout --orphan temp_branch
+          git config --local user.name Bot
+          git config --local user.email bot@github.com
+          git checkout --orphan temp_snapshot
           git add .
-          git commit -m "初始化快照，仅保留最新运行结果"
+          git commit -m "每周快照清理 $(date '+%Y-%m-%d %H:%M:%S')"
           git branch -D master
           git branch -m master
           git push -f origin master
