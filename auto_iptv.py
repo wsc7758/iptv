@@ -15,7 +15,7 @@ OUTPUT_TXT = "iptv.txt"
 # 测速参数【统一常量】
 STREAM_REQ_TIMEOUT = 3.5    # 延长超时，过滤不稳定链接
 STREAM_EVAL_WORKERS = 6
-MAX_LINK_PER_CHANNEL = 5     # 减少单频道有效链接数量，只保留最优节点
+MAX_LINK_PER_CHANNEL = 10     # 减少单频道有效链接数量，只保留最优节点
 FALLBACK_MAX_LINK = 3        # 无有效链接时兜底最多保留3条
 LATENCY_THRESHOLD = 1.2      # 新增：延迟高于1.2s即使连通也降级为备选
 # ======================================================
