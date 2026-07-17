@@ -1,6 +1,5 @@
 import os
 import time
-import re
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -15,11 +14,10 @@ OUTPUT_TXT = "iptv.txt"
 
 # 测速参数【统一常量】
 STREAM_REQ_TIMEOUT = 3.5
-STREAM_EVAL_WORKERS = 3
+STREAM_EVAL_WORKERS = 6   # 降低并发，防止容器网络拥堵
 MAX_LINK_PER_CHANNEL = 3
 FALLBACK_MAX_LINK = 3
 LATENCY_THRESHOLD = 1.2
-MIN_VERTICAL_RES = 720
 # ======================================================
 
 import warnings
@@ -27,13 +25,10 @@ warnings.filterwarnings("ignore")
 import requests
 requests.packages.urllib3.disable_warnings()
 
-RESOLUTION_REG = re.compile(r'RESOLUTION=(\d+)x(\d+)', re.IGNORECASE)
-DISCONTINUITY_REG = re.compile(r'#EXT-X-DISCONTINUITY', re.IGNORECASE)
-
 def load_blacklist():
     exact_black = set()
     fuzzy_keywords = []
-    url_black = [] # URL链接黑名单关键词
+    url_black = []
     if os.path.exists(BLACKLIST_FILE):
         with open(BLACKLIST_FILE, "r", encoding="utf-8") as f:
             for line in f:
@@ -61,40 +56,15 @@ def is_black_channel(channel_name, exact_black, fuzzy_keywords):
     return False
 
 def is_black_url(url, url_black_list):
-    """判断播放链接是否命中URL黑名单"""
     for kw in url_black_list:
         if kw in url:
             return True
     return False
 
-def has_ad_discontinuity(url):
-    """检测m3u8是否存在广告切换标签（插播广告）"""
-    try:
-        resp = requests.get(url, timeout=2, verify=False)
-        text = resp.text
-        if DISCONTINUITY_REG.search(text):
-            return True
-    except Exception:
-        pass
-    return False
-
-def get_stream_resolution(url):
-    try:
-        resp = requests.get(url, timeout=2.5, verify=False)
-        text = resp.text
-        matches = RESOLUTION_REG.findall(text)
-        if matches:
-            w, h = matches[0]
-            return int(h)
-    except Exception:
-        pass
-    return None
-
 def test_single_stream(url, url_black_list):
     start = time.perf_counter()
-    # 优先判断URL黑名单，直接拦截广告链接
     if is_black_url(url, url_black_list):
-        return (time.perf_counter() - start, url, False, None, True)
+        return (time.perf_counter() - start, url, False, True)
     ok = False
     try:
         resp = requests.head(url, timeout=STREAM_REQ_TIMEOUT, allow_redirects=True, verify=False)
@@ -103,10 +73,7 @@ def test_single_stream(url, url_black_list):
     except Exception:
         pass
     latency = time.perf_counter() - start
-    height = None
-    if ok:
-        height = get_stream_resolution(url)
-    return (latency, url, ok, height, False)
+    return (latency, url, ok, False)
 
 def load_alias():
     alias_map = {}
@@ -204,7 +171,6 @@ def main():
     std_channels = defaultdict(list)
     for raw_name, urllist in raw_all_channels.items():
         std_name = alias_map.get(raw_name, raw_name)
-        # 拦截黑名单频道
         if is_black_channel(std_name, exact_black, fuzzy_keywords):
             print(f"【频道黑名单剔除】{std_name}")
             continue
@@ -227,11 +193,11 @@ def main():
             futures_map[f] = (ch, link)
         for future in as_completed(futures_map):
             ch_name, url = futures_map[future]
-            latency, url, ok, height, hit_url_black = future.result()
+            latency, url, ok, hit_url_black = future.result()
             if hit_url_black:
                 print(f"【URL黑名单剔除广告链接】{url}")
                 continue
-            channel_all_test_result[ch_name].append((latency, url, ok, height))
+            channel_all_test_result[ch_name].append((latency, url, ok))
 
     lines = ["#EXTM3U x-tvg-url=\"epg.xml.gz\""]
     template_queue = []
@@ -265,15 +231,12 @@ def main():
             continue
         valid_items = []
         invalid_items = []
-        for latency, url, ok, height in test_results:
+        for latency, url, ok in test_results:
             if ok:
-                if height is not None and height < MIN_VERTICAL_RES:
-                    invalid_items.append((latency, url))
+                if latency <= LATENCY_THRESHOLD:
+                    valid_items.append((latency, url))
                 else:
-                    if latency <= LATENCY_THRESHOLD:
-                        valid_items.append((latency, url))
-                    else:
-                        invalid_items.append((latency, url))
+                    invalid_items.append((latency, url))
             else:
                 invalid_items.append((latency, url))
 
@@ -300,7 +263,7 @@ def main():
     with open(OUTPUT_TXT, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
-    valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, ok, _ in items))
+    valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, ok in items))
     print(f"\n【执行汇总】")
     print(f"测速有效频道: {valid_channel_cnt}")
     print(f"模板匹配输出频道: {matched_count}")
