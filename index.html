@@ -19,7 +19,7 @@ video{width:100%;height:100%;object-fit:contain;}
 <body>
 <div id="list"></div>
 <div id="player">
-<video id="video" controls autoplay></video>
+<video id="video" controls></video>
 </div>
 
 <script>
@@ -34,21 +34,19 @@ async function loadChannels(){
     const text = await res.text();
     const lines = text.split('\n');
     let tempName = "";
-
     lines.forEach(line=>{
       line = line.trim();
       if(!line) return;
-      // 匹配频道名称行 #EXTINF:-1 group-title="xxx",频道名
       if(line.startsWith("#EXTINF")){
         const pos = line.lastIndexOf(',');
         if(pos !== -1){
           tempName = line.slice(pos+1);
         }
       }
-      // 匹配播放地址（http开头）
       else if(line.startsWith("http")){
         const name = tempName || "未知频道";
-        const url = line;
+        // 自动把http强制替换为https，解决混合内容报错
+        let url = line.replace("http://","https://");
         const div = document.createElement('div');
         div.className = "channel";
         div.innerText = name;
@@ -57,8 +55,7 @@ async function loadChannels(){
       }
     })
   }catch(err){
-    listDom.innerHTML = `<div style="padding:10px;color:red;">加载失败：${err.message}</div>`;
-    console.error(err);
+    listDom.innerHTML = `<div style="color:red;">加载异常：${err.message}</div>`;
   }
 }
 
@@ -73,7 +70,6 @@ function playUrl(url, dom){
   }else if(video.canPlayType('application/vnd.apple.mpegurl')){
     video.src = url;
   }
-  video.play().catch(e=>console.log("浏览器自动播放限制",e));
 }
 loadChannels();
 </script>
