@@ -45,8 +45,8 @@ async function loadChannels(){
       }
       else if(line.startsWith("http")){
         const name = tempName || "未知频道";
-        // 自动把http强制替换为https，解决混合内容报错
-        let url = line.replace("http://","https://");
+        // 保留原始http链接，不再强制替换https
+        let url = line;
         const div = document.createElement('div');
         div.className = "channel";
         div.innerText = name;
