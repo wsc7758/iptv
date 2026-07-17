@@ -45,6 +45,7 @@ def load_blacklist():
                         fuzzy_keywords.append(word)
                 else:
                     exact_black.add(line)
+    print(f"【黑名单加载完成】精确频道黑名单:{len(exact_black)}条，模糊关键词:{len(fuzzy_keywords)}条，URL广告黑名单:{len(url_black)}条")
     return exact_black, fuzzy_keywords, url_black
 
 def is_black_channel(channel_name, exact_black, fuzzy_keywords):
@@ -87,6 +88,7 @@ def load_alias():
                 std_name = parts[0]
                 for raw_name in parts:
                     alias_map[raw_name] = std_name
+    print(f"【别名表加载完成】共载入 {len(alias_map)} 条别名映射")
     return alias_map
 
 def load_allow_list():
@@ -97,6 +99,7 @@ def load_allow_list():
                 line = line.strip()
                 if line and not line.startswith("#"):
                     allow_set.add(line)
+    print(f"【白名单加载完成】允许频道总数: {len(allow_set)}")
     return allow_set
 
 def fetch_source_urls():
@@ -107,6 +110,7 @@ def fetch_source_urls():
                 u = line.strip()
                 if u and not u.startswith("#"):
                     url_list.append(u)
+    print(f"【源列表读取完成】待拉取源总数：{len(url_list)}")
     return url_list
 
 def download_text(url):
@@ -152,32 +156,41 @@ def parse_txt(content):
     return result
 
 def main():
+    print("========== IPTV分拣程序开始运行 ==========")
     alias_map = load_alias()
     allow_set = load_allow_list()
     exact_black, fuzzy_keywords, url_black_list = load_blacklist()
     source_urls = fetch_source_urls()
 
     raw_all_channels = defaultdict(list)
-    for src in source_urls:
-        print(f"正在拉取源: {src}")
+    for idx, src in enumerate(source_urls, start=1):
+        print(f"\n【{idx}/{len(source_urls)}】正在拉取源: {src}")
         txt = download_text(src)
+        if not txt:
+            print(f"【跳过】该源无返回内容")
+            continue
         if "#EXTM3U" in txt:
             data = parse_m3u(txt)
         else:
             data = parse_txt(txt)
+        print(f"【源解析完成】该源解析出频道数量：{len(data)}")
         for ch, urls in data.items():
             raw_all_channels[ch].extend(urls)
+    print(f"\n【全部源拉取完毕】原始未去重频道总数：{len(raw_all_channels)}")
 
     std_channels = defaultdict(list)
+    drop_black_channel_count = 0
     for raw_name, urllist in raw_all_channels.items():
         std_name = alias_map.get(raw_name, raw_name)
         if is_black_channel(std_name, exact_black, fuzzy_keywords):
             print(f"【频道黑名单剔除】{std_name}")
+            drop_black_channel_count += 1
             continue
         if allow_set and std_name not in allow_set:
             continue
         unique_links = list(dict.fromkeys(urllist))
         std_channels[std_name].extend(unique_links)
+    print(f"【频道预处理结束】黑名单丢弃频道总数:{drop_black_channel_count}，进入测速频道总数:{len(std_channels)}")
 
     channel_all_test_result = defaultdict(list)
     all_test_tasks = []
@@ -185,7 +198,9 @@ def main():
         for link in urllist:
             all_test_tasks.append((ch_name, link))
 
-    print(f"开始批量测速，总待检测链接数量：{len(all_test_tasks)}")
+    total_task_num = len(all_test_tasks)
+    print(f"\n【开始批量测速】总待检测链接数量：{total_task_num}")
+    finished = 0
     with ThreadPoolExecutor(max_workers=STREAM_EVAL_WORKERS) as pool:
         futures_map = {}
         for ch, link in all_test_tasks:
@@ -194,10 +209,15 @@ def main():
         for future in as_completed(futures_map):
             ch_name, url = futures_map[future]
             latency, url, ok, hit_url_black = future.result()
+            finished += 1
+            # 每20条打印一次进度，避免日志刷屏；命中黑名单强制打印
+            if hit_url_black or finished % 20 == 0:
+                print(f"【测速进度 {finished}/{total_task_num}】已完成链接测速")
             if hit_url_black:
-                print(f"【URL黑名单剔除广告链接】{url}")
+                print(f"  >> 【URL黑名单剔除广告链接】{url}")
                 continue
             channel_all_test_result[ch_name].append((latency, url, ok))
+    print("【全部测速任务执行完毕】\n")
 
     lines = ["#EXTM3U x-tvg-url=\"epg.xml.gz\""]
     template_queue = []
@@ -223,6 +243,7 @@ def main():
                     group_name = "默认分组"
                 template_queue.append(std_name)
                 channel_info[std_name] = (display_name, group_name)
+    print(f"【模板读取完成】模板内待输出频道总数：{len(template_queue)}")
 
     matched_count = 0
     for std_name in template_queue:
@@ -255,7 +276,7 @@ def main():
             invalid_items.sort(key=lambda x: x[0])
             unique_fallback = list(dict.fromkeys([u for _, u in invalid_items]))
             output_links = unique_fallback[:FALLBACK_MAX_LINK]
-            print(f"【降级兜底】频道[{show_name}] 仅保留备选链接")
+            print(f"【降级兜底】频道[{show_name}] 仅保留备选链接{len(output_links)}条")
             for link in output_links:
                 lines.append(f'#EXTINF:-1 group-title="{group}",{show_name}')
                 lines.append(link)
@@ -264,10 +285,11 @@ def main():
         f.write("\n".join(lines))
 
     valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, ok in items))
-    print(f"\n【执行汇总】")
-    print(f"测速有效频道: {valid_channel_cnt}")
-    print(f"模板匹配输出频道: {matched_count}")
-    print("==== IPTV分拣完成 ====")
+    print(f"\n========== 执行汇总 ==========")
+    print(f"测速存在连通链接的频道总数: {valid_channel_cnt}")
+    print(f"template模板内成功输出频道总数: {matched_count}")
+    print(f"最终输出文件：{OUTPUT_TXT}")
+    print("==== IPTV分拣程序全部结束 ====")
 
 if __name__ == "__main__":
     main()
