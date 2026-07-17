@@ -31,7 +31,7 @@ jobs:
           git config --local user.email bot@github.com
           git add .
           git commit -m "$(date '+%Y-%m-%d %H:%M:%S') 自动更新iptv" || true
-          git push origin master
+          git push -f origin master
 
       # 【仅每周日执行】清理全部Git历史，保留最新快照
       - name: 每周日精简提交历史
