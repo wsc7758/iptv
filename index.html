@@ -29,22 +29,29 @@ const video = document.getElementById('video');
 let hls = null;
 
 async function loadChannels(){
-  const res = await fetch(TXT_URL);
-  const text = await res.text();
-  const lines = text.split('\n');
-  lines.forEach(line=>{
-    line = line.trim();
-    if(!line) return;
-    const arr = line.split(',');
-    if(arr.length<3) return;
-    const name = arr[0];
-    const src = arr[2];
-    const div = document.createElement('div');
-    div.className = "channel";
-    div.innerText = name;
-    div.onclick=()=>playUrl(src,div);
-    listDom.appendChild(div);
-  })
+  try{
+    const res = await fetch(TXT_URL);
+    const text = await res.text();
+    const lines = text.split('\n');
+    lines.forEach(line=>{
+      line = line.trim();
+      if(!line) return;
+      const arr = line.split(',');
+      // 放宽判断，兼容两种格式：名称,,url / 名称,分类,url
+      if(arr.length < 2) return;
+      const name = arr[0];
+      const src = arr[arr.length - 1];
+      if(!src.startsWith("http")) return;
+      const div = document.createElement('div');
+      div.className = "channel";
+      div.innerText = name;
+      div.onclick=()=>playUrl(src,div);
+      listDom.appendChild(div);
+    })
+  }catch(err){
+    listDom.innerHTML = `<div style="padding:10px;color:red;">加载频道失败：${err.message}</div>`;
+    console.error(err);
+  }
 }
 
 function playUrl(url, dom){
@@ -58,7 +65,7 @@ function playUrl(url, dom){
   }else if(video.canPlayType('application/vnd.apple.mpegurl')){
     video.src = url;
   }
-  video.play();
+  video.play().catch(e=>console.log("播放触发浏览器策略限制",e));
 }
 loadChannels();
 </script>
