@@ -1,4 +1,5 @@
 import os
+import re
 import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -11,6 +12,7 @@ ALLOW_LIST_FILE = os.path.join(BASE_PATH, "allow_list.txt")
 TEMPLATE_OUTPUT_FILE = os.path.join(BASE_PATH, "template_output.txt")
 BLACKLIST_FILE = os.path.join(BASE_PATH, "blacklist.txt")
 OUTPUT_TXT = "iptv.txt"
+TV_BOX_OUTPUT = "tv.txt"
 
 # 测速参数【统一常量】
 STREAM_REQ_TIMEOUT = 3.5
@@ -23,7 +25,7 @@ LATENCY_THRESHOLD = 1.2
 import warnings
 warnings.filterwarnings("ignore")
 import requests
-requests.packages.urllib3.disable_warnings()
+requests.packages.urllib3.disable_warnings
 
 def load_blacklist():
     exact_black = set()
@@ -155,10 +157,39 @@ def parse_txt(content):
                 result[ch_name].append(url)
     return result
 
+# M3U转DIYP标准txt格式工具函数
+def m3u_to_tvbox_txt(m3u_content):
+    group_data = {}
+    curr_group = "默认分组"
+    curr_ch = ""
+    for raw_line in m3u_content.splitlines():
+        l = raw_line.strip()
+        if not l:
+            continue
+        if l.startswith("#EXTINF"):
+            # 提取分组名称
+            g_match = re.search(r'group-title="([^"]+)"', l)
+            if g_match:
+                curr_group = g_match.group(1)
+            # 提取频道名称
+            if "," in l:
+                curr_ch = l.split(",")[-1].strip()
+        elif l.startswith("http"):
+            # 清除链接尾部$线路备注垃圾字符
+            clean_url = re.sub(r"\$.*", "", l).strip()
+            if curr_group not in group_data:
+                group_data[curr_group] = []
+            group_data[curr_group].append(f"{curr_ch},{clean_url}")
+    # 组装输出文本
+    out_lines = []
+    for gname, ch_lines in group_data.items():
+        out_lines.append(f"{gname},#genre#")
+        out_lines.extend(ch_lines)
+    return "\n".join(out_lines)
+
 def main():
     print("========== IPTV分拣程序开始运行 ==========")
     alias_map = load_alias()
-    allow_set = load_allow_list()
     exact_black, fuzzy_keywords, url_black_list = load_blacklist()
     source_urls = fetch_source_urls()
 
@@ -188,12 +219,12 @@ def main():
             continue
         if allow_set and std_name not in allow_set:
             continue
-        # 先合并多源全部链接，再全局去重，跨源消除重复URL
+        # 合并链接并去重
         std_channels[std_name].extend(urllist)
         all_urls = std_channels[std_name]
         before = len(all_urls)
         std_channels[std_name] = list(dict.fromkeys(all_urls))
-        after = len(std_channels[std_name])
+        after = len(std_channels)
         if before > after:
             print(f"【频道去重】{std_name} 清除重复线路 {before - after} 条")
     print(f"【频道预处理结束】黑名单丢弃频道总数:{drop_black_channel_count}，进入测速频道总数:{len(std_channels)}")
@@ -216,7 +247,6 @@ def main():
             ch_name, url = futures_map[future]
             latency, url, ok, hit_url_black = future.result()
             finished += 1
-            # 每20条打印一次进度，避免日志刷屏；命中黑名单强制打印
             if hit_url_black or finished % 20 == 0:
                 print(f"【测速进度 {finished}/{total_task_num}】已完成链接测速")
             if hit_url_black:
@@ -248,6 +278,7 @@ def main():
                     display_name = raw_line.strip()
                     group_name = "默认分组"
                 template_queue.append(std_name)
+                # 修复BUG：原group_info → group_name
                 channel_info[std_name] = (display_name, group_name)
     print(f"【模板读取完成】模板内待输出频道总数：{len(template_queue)}")
 
@@ -287,14 +318,24 @@ def main():
                 lines.append(f'#EXTINF:-1 group-title="{group}",{show_name}')
                 lines.append(link)
 
+    # 写入M3U格式 iptv.txt
     with open(OUTPUT_TXT, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
+
+    # 转换生成DIYP专用 tv.txt
+    with open(OUTPUT_TXT, "r", encoding="utf-8") as rf:
+        m3u_full = rf.read()
+    tvbox_text = m3u_to_tvbox_txt(m3u_full)
+    with open(TV_BOX_OUTPUT, "w", encoding="utf-8") as wf:
+        wf.write(tvbox_text)
+    print(f"\n【额外生成完成】DIYP专用订阅文件：{TV_BOX_OUTPUT}")
 
     valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, ok in items))
     print(f"\n========== 执行汇总 ==========")
     print(f"测速存在连通链接的频道总数: {valid_channel_cnt}")
     print(f"template模板内成功输出频道总数: {matched_count}")
-    print(f"最终输出文件：{OUTPUT_TXT}")
+    print(f"M3U通用文件：{OUTPUT_TXT}")
+    print(f"DIYP专用分组文件：{TV_BOX_OUTPUT}")
     print("==== IPTV分拣程序全部结束 ====")
 
 if __name__ == "__main__":
