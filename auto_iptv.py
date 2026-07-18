@@ -174,6 +174,9 @@ def m3u_to_tvbox_txt(m3u_content):
             # 提取频道名称
             if "," in l:
                 curr_ch = l.split(",")[-1].strip()
+                # 仅匹配 CCTV-数字+空格 频道，插入软连字符规避DIYP截断，4K/8K/CCTV-K不受影响
+                if re.match(r"^CCTV-\d+\s", curr_ch):
+                    curr_ch = "CCTV\u00AD-" + curr_ch[5:]
         elif l.startswith("http"):
             # 清除链接尾部$线路备注垃圾字符
             clean_url = re.sub(r"\$.*", "", l).strip()
@@ -189,7 +192,9 @@ def m3u_to_tvbox_txt(m3u_content):
 
 def main():
     print("========== IPTV分拣程序开始运行 ==========")
+    # 修复点：调整加载顺序，allow_set提前定义，解决NameError
     alias_map = load_alias()
+    allow_set = load_allow_list()
     exact_black, fuzzy_keywords, url_black_list = load_blacklist()
     source_urls = fetch_source_urls()
 
@@ -217,6 +222,7 @@ def main():
             print(f"【频道黑名单剔除】{std_name}")
             drop_black_channel_count += 1
             continue
+        # 此时allow_set已提前加载，不会报未定义
         if allow_set and std_name not in allow_set:
             continue
         # 合并链接并去重
@@ -278,7 +284,6 @@ def main():
                     display_name = raw_line.strip()
                     group_name = "默认分组"
                 template_queue.append(std_name)
-                # 修复BUG：原group_info → group_name
                 channel_info[std_name] = (display_name, group_name)
     print(f"【模板读取完成】模板内待输出频道总数：{len(template_queue)}")
 
