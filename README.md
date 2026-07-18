@@ -2,10 +2,12 @@
 
 ## 声明: 所有播放源均收集于互联网，仅供测试研究学习，不得商用!
 
-## 接口：[https://wsc7758.github.io/iptv/iptv.txt]
+## 接口：
+- [wsc7758/live](https://wsc7758.github.io/iptv/iptv/wsc7758/live)
 
 ## 致谢
 - [fanmingming/live](https://github.com/fanmingming/live)
+  
 - [饭太硬/live](http://www.饭太硬.cc/tv/饭太硬/live)
 
 ## Star History
