@@ -1,7 +1,7 @@
 import os
 import re
 import time
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # ====================== 全局配置区 ======================
@@ -159,7 +159,7 @@ def parse_txt(content):
 
 # M3U转DIYP标准txt格式工具函数
 def m3u_to_tvbox_txt(m3u_content):
-    group_data = {}
+    group_data = OrderedDict()
     curr_group = "默认分组"
     curr_ch = ""
     for raw_line in m3u_content.splitlines():
