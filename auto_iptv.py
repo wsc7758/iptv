@@ -188,8 +188,11 @@ def main():
             continue
         if allow_set and std_name not in allow_set:
             continue
-        unique_links = list(dict.fromkeys(urllist))
-        std_channels[std_name].extend(unique_links)
+        # 先合并，再全局去重，跨源消除重复链接
+        std_channels[std_name].extend(urllist)
+        # 全局去重
+        all_urls = std_channels[std_name]
+        std_channels[std_name] = list(dict.fromkeys(all_urls))
     print(f"【频道预处理结束】黑名单丢弃频道总数:{drop_black_channel_count}，进入测速频道总数:{len(std_channels)}")
 
     channel_all_test_result = defaultdict(list)
