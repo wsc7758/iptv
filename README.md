@@ -6,6 +6,7 @@
 
 ## 致谢
 - [fanmingming/live](https://github.com/fanmingming/live)
+- [饭太硬/live](http://www.饭太硬.cc/tv/饭太硬/live)
 
 ## Star History
 <picture>
