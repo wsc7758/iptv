@@ -3,7 +3,7 @@
 ## 声明: 所有播放源均收集于互联网，仅供测试研究学习，不得商用!
 
 ## 接口：
-- [wsc7758/live](https://wsc7758.github.io/iptv/iptv/wsc7758/live)
+- [wsc7758/live](https://wsc7758.github.io/iptv/iptv)
 
 ## 致谢
 - [fanmingming/live](https://github.com/fanmingming/live)
