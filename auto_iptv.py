@@ -10,7 +10,7 @@ ALIAS_FILE = os.path.join(BASE_PATH, "alias.txt")
 ALLOW_LIST_FILE = os.path.join(BASE_PATH, "allow_list.txt")
 TEMPLATE_OUTPUT_FILE = os.path.join(BASE_PATH, "template_output.txt")
 BLACKLIST_FILE = os.path.join(BASE_PATH, "blacklist.txt")
-OUTPUT_TXT = "iptv"
+OUTPUT_TXT = "iptv.txt"
 
 # 测速参数【统一常量】
 STREAM_REQ_TIMEOUT = 3.5
@@ -188,7 +188,7 @@ def main():
             continue
         if allow_set and std_name not in allow_set:
             continue
-        # 先合并多源全部链接，再全局去重消除跨源重复URL
+        # 先合并多源全部链接，再全局去重，跨源消除重复URL
         std_channels[std_name].extend(urllist)
         all_urls = std_channels[std_name]
         before = len(all_urls)
