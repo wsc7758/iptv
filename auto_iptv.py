@@ -172,8 +172,13 @@ def m3u_to_tvbox_txt(m3u_content):
             if g_match:
                 curr_group = g_match.group(1)
             # 提取频道名称
+            # 提取频道名称
             if "," in l:
                 curr_ch = l.split(",")[-1].strip()
+                # 仅对 CCTV-数字+空格 的频道插入软连字符，避开DIYP截断规则，不改动4K/8K
+                import re
+                if re.match(r"^CCTV-\d+\s", curr_ch):
+                    curr_ch = "CCTV\u00AD-" + curr_ch[5:]
         elif l.startswith("http"):
             # 清除链接尾部$线路备注垃圾字符
             clean_url = re.sub(r"\$.*", "", l).strip()
