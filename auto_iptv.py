@@ -96,17 +96,12 @@ def load_alias():
 def load_allow_list():
     allow_set = set()
     if os.path.exists(ALLOW_LIST_FILE):
-        try:
-            with open(ALLOW_LIST_FILE, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith("#"):
-                        allow_set.add(line)
-            print(f"【白名单加载完成】允许频道总数: {len(allow_set)}")
-        except Exception as e:
-            print(f"【警告】读取白名单文件异常，关闭白名单过滤，错误信息：{str(e)}")
-    else:
-        print(f"【提示】未找到白名单文件 {ALLOW_LIST_FILE}，关闭白名单过滤")
+        with open(ALLOW_LIST_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    allow_set.add(line)
+    print(f"【白名单加载完成】允许频道总数: {len(allow_set)}")
     return allow_set
 
 def fetch_source_urls():
@@ -177,13 +172,8 @@ def m3u_to_tvbox_txt(m3u_content):
             if g_match:
                 curr_group = g_match.group(1)
             # 提取频道名称
-            # 提取频道名称
             if "," in l:
                 curr_ch = l.split(",")[-1].strip()
-                # 仅对 CCTV-数字+空格 的频道插入软连字符，避开DIYP截断规则，不改动4K/8K
-                import re
-                if re.match(r"^CCTV-\d+\s", curr_ch):
-                    curr_ch = "CCTV\u00AD-" + curr_ch[5:]
         elif l.startswith("http"):
             # 清除链接尾部$线路备注垃圾字符
             clean_url = re.sub(r"\$.*", "", l).strip()
