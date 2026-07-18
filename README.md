@@ -3,16 +3,11 @@
 ## 声明: 所有播放源均收集于互联网，仅供测试研究学习，不得商用!
 
 ## 接口：
-- [wsc7758/live](https://wsc7758.github.io/iptv/iptv)
+- [wsc7758/live](https://wsc7758.github.io/iptv/iptv.txt)
 
 ## 致谢
-- [fanmingming/live](https://github.com/fanmingming/live)
+- [fanmingming/live](https://github.com)
   
-- [饭太硬/live](http://www.饭太硬.cc/tv/饭太硬/live)
+- [饭太硬/live](http://www.饭太硬.cc/tv)
 
-## Star History
-<picture>
-<source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=zhi35/iptv&type=Date&theme=dark" />
-<source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=zhi35/iptv&type=Date" />
-<img alt="Star History Chart" src="https://api.star-history.com/svg?repos=zhi35/iptv&type=Date" />
-</picture>
+- 这套程序还要感谢很大大佬，只是我现在手头工作太忙没有来得及写进去，后面我会逐步的完善。
