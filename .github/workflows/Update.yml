@@ -13,6 +13,8 @@ jobs:
     timeout-minutes: 55  # 55分钟主动终止，避免占用资源
     permissions:
       contents: write
+      pages: write       # 新增：Pages部署权限
+      id-token: write    # 新增：Pages鉴权令牌权限
     steps:
       - name: 拉取仓库代码
         uses: actions/checkout@v4
@@ -45,3 +47,14 @@ jobs:
           git branch -D master
           git branch -m master
           git push -f origin master
+
+      # ========== 新增：构建并部署 GitHub Pages ==========
+      - name: 打包 Pages 静态资源
+        if: success()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./
+
+      - name: 部署到 GitHub Pages
+        if: success()
+        uses: actions/deploy-pages@v4
