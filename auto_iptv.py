@@ -96,12 +96,17 @@ def load_alias():
 def load_allow_list():
     allow_set = set()
     if os.path.exists(ALLOW_LIST_FILE):
-        with open(ALLOW_LIST_FILE, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#"):
-                    allow_set.add(line)
-    print(f"【白名单加载完成】允许频道总数: {len(allow_set)}")
+        try:
+            with open(ALLOW_LIST_FILE, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#"):
+                        allow_set.add(line)
+            print(f"【白名单加载完成】允许频道总数: {len(allow_set)}")
+        except Exception as e:
+            print(f"【警告】读取白名单文件异常，关闭白名单过滤，错误信息：{str(e)}")
+    else:
+        print(f"【提示】未找到白名单文件 {ALLOW_LIST_FILE}，关闭白名单过滤")
     return allow_set
 
 def fetch_source_urls():
