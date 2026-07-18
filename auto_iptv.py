@@ -174,9 +174,9 @@ def m3u_to_tvbox_txt(m3u_content):
             # 提取频道名称
             if "," in l:
                 curr_ch = l.split(",")[-1].strip()
-                # 仅匹配 CCTV-数字+空格 频道，插入软连字符规避DIYP截断，4K/8K/CCTV-K不受影响
-                if re.match(r"^CCTV-\d+\s", curr_ch):
-                    curr_ch = "CCTV\u00AD-" + curr_ch[5:]
+                # 匹配所有CCTV-数字开头频道，半角-替换成全角－，不用改模板/白名单
+                if re.match(r"^CCTV-\d+", curr_ch):
+                    curr_ch = curr_ch.replace("-", "－", 1)
         elif l.startswith("http"):
             # 清除链接尾部$线路备注垃圾字符
             clean_url = re.sub(r"\$.*", "", l).strip()
