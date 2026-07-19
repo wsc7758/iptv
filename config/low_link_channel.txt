@@ -1,9 +1,3 @@
-CCTV-1 综合
-CCTV-14 少儿
-CCTV-2 财经
 CCTV-8K
-CCTV怀旧剧场
-CCTV第一剧场
-CCTV风云剧场
 北京卡酷少儿
 哈哈炫动
