@@ -384,7 +384,7 @@ def main():
         wf.write(tvbox_text)
     print(f"\n【额外生成完成】DIYP专用订阅文件：{TV_BOX_OUTPUT}")
 
-    valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, _, ok in items))
+    valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, ok in items))
 
     # ====================== 各订阅源链路检测统计报表 ======================
     print("\n===================== 各订阅源链路检测统计报表 =====================")
