@@ -159,23 +159,21 @@ def test_single_stream(url, url_black_list):
         return (STREAM_REQ_TIMEOUT, url, False, True)
     latency = 999.9
     ok = False
-    # 测速重试循环
+    # 测速重试循环，成功直接跳出，不浪费请求
     for _ in range(STREAM_RETRY_TIMES + 1):
         start = time.perf_counter()
         try:
-            # 使用GET请求获取1024字节片段，替代HEAD，真实模拟播放加载速度
             resp = requests.get(
                 url,
                 timeout=STREAM_REQ_TIMEOUT,
                 allow_redirects=True,
                 verify=False,
-                headers={"Range": "bytes=0-1023"}  # 只拉取开头1KB，减少流量
+                headers={"Range": "bytes=0-1023"}
             )
-            # 仅200/206正常返回码判定有效，多轮跳转、4xx/5xx直接失效
             if resp.status_code in (200, 206):
                 latency = time.perf_counter() - start
                 ok = True
-                break
+                break  # 测速成功直接退出循环，无需多余重试
         except Exception:
             continue
     return (latency, url, ok, False)
