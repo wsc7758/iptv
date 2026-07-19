@@ -19,7 +19,7 @@ TV_BOX_OUTPUT = "tv.txt"
 # 测速业务常量【提速优化，适配GitHub Actions】
 STREAM_REQ_TIMEOUT = 0.8    # 缩短单条等待时长
 STREAM_RETRY_TIMES = 0     # 取消重试，减少重复请求
-STREAM_REQ_WORKERS = 4    # 拉满并发，并行测速
+STREAM_REQ_WORKERS = 4    # 降低并发，避免TCP端口耗尽
 MAX_LINK_PER_CHANNEL = 8
 FALLBACK_MAX_LINK = 5
 LATENCY_THRESHOLD = 1.2    # ≥1.2s 判定为慢速链，自动拉黑
@@ -197,14 +197,13 @@ def test_single_stream(url, url_black_list):
     for _ in range(STREAM_RETRY_TIMES + 1):
         start = time.perf_counter()
         try:
-            # 使用GET请求获取1024字节片段，替代HEAD，真实模拟播放加载速度
+            # 使用全局复用Session，Range头已全局配置，无需重复传参
             resp = SESSION.get(
                 url,
                 timeout=STREAM_REQ_TIMEOUT,
                 allow_redirects=True,
-                verify=False,
-                headers={"Range": "bytes=0-1023"}
-           )
+                verify=False
+            )
             # 仅200/206正常返回码判定有效，多轮跳转、4xx/5xx直接失效
             if resp.status_code in (200, 206):
                 latency = time.perf_counter() - start
@@ -255,7 +254,7 @@ def fetch_source_urls():
 # ====================== 订阅文本解析 ======================
 def download_text(url):
     try:
-        resp = requests.get(url, timeout=8, verify=False)
+        resp = SESSION.get(url, timeout=8, verify=False)
         resp.encoding = resp.apparent_encoding
         return resp.text
     except Exception as e:
@@ -518,7 +517,7 @@ def main():
         print(f"\n订阅源地址：{source_url}")
         print(f"  ① 原始抓取总线路：{stat['total']} 条")
         print(f"  ② 广告URL过滤线路：{stat['black']} 条")
-        print(f"  ③ 快速优质链路(≤0.8s)：{stat['good']} 条")
+        print(f"  ③ 快速优质链路(≤1.2s)：{stat['good']} 条")
         print(f"  ④ 慢速兜底可用链路：{stat['fallback']} 条")
         print(f"  ✅ 该源总有效可用线路：{stat['good'] + stat['fallback']} 条")
     print("==============================================================\n")
