@@ -4,7 +4,7 @@ import time
 from collections import defaultdict, OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# ====================== 全局配置区（测速参数收紧优化） ======================
+# ====================== 全局配置区（测速参数提速优化 + 自动黑名单开关） ======================
 BASE_PATH = "config/"
 SOURCES_FILE = os.path.join(BASE_PATH, "sources.txt")
 ALIAS_FILE = os.path.join(BASE_PATH, "alias.txt")
@@ -22,8 +22,10 @@ STREAM_RETRY_TIMES = 0     # 取消重试，减少重复请求
 STREAM_REQ_WORKERS = 10    # 拉满并发，并行测速
 MAX_LINK_PER_CHANNEL = 8
 FALLBACK_MAX_LINK = 5
-LATENCY_THRESHOLD = 0.8
+LATENCY_THRESHOLD = 1.2    # ≥1.2s 判定为慢速链，自动拉黑
 MIN_STOCK_LINK = 5
+AUTO_BLACK_SLOW = True     # 开启：延迟超阈值自动拉黑
+AUTO_BLACK_DEAD = True     # 开启：完全失效死链自动拉黑
 # ======================================================
 
 import warnings
@@ -115,11 +117,11 @@ def build_low_channel_white(stock_set, template_set, stock_map):
     print(f"【临时白名单生成】待补充频道总数：{len(low_channel_set)}，路径：{LOW_LINK_CHANNEL_FILE}")
     return low_channel_set
 
-# ====================== 黑名单工具 ======================
+# ====================== 黑名单工具【新增自动拉黑持久化函数】 ======================
 def load_blacklist():
     exact_black = set()
     fuzzy_keywords = []
-    url_black = []
+    url_black = set()  # 改用集合自动去重
     if os.path.exists(BLACKLIST_FILE):
         with open(BLACKLIST_FILE, "r", encoding="utf-8") as f:
             for line in f:
@@ -129,7 +131,7 @@ def load_blacklist():
                 if line.startswith("url*"):
                     word = line[4:].strip()
                     if word:
-                        url_black.append(word)
+                        url_black.add(word)
                 elif line.startswith("*"):
                     word = line[1:].strip()
                     if word:
@@ -137,7 +139,32 @@ def load_blacklist():
                 else:
                     exact_black.add(line)
     print(f"【黑名单加载】精确频道:{len(exact_black)} 模糊关键词:{len(fuzzy_keywords)} URL广告:{len(url_black)}")
-    return exact_black, fuzzy_keywords, url_black
+    return exact_black, fuzzy_keywords, list(url_black)
+
+# 测速结束后追加自动拉黑的URL到黑名单文件（去重追加）
+def append_auto_black_url(url_list):
+    if not url_list:
+        return
+    # 读取原有全部黑名单URL
+    exist_url_set = set()
+    if os.path.exists(BLACKLIST_FILE):
+        with open(BLACKLIST_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("url*"):
+                    kw = line[4:].strip()
+                    exist_url_set.add(kw)
+    # 合并新增黑名单
+    new_black = set(url_list) - exist_url_set
+    if not new_black:
+        print("【自动黑名单】无新增慢链/死链，无需写入")
+        return
+    # 追加写入文件，保留原有内容
+    with open(BLACKLIST_FILE, "a", encoding="utf-8") as f:
+        f.write("\n# 自动生成黑名单 - 本次测速失效/慢速链接\n")
+        for kw in sorted(new_black):
+            f.write(f"url*{kw}\n")
+    print(f"【自动黑名单】新增 {len(new_black)} 条慢速/失效链接永久拉黑，已写入blacklist.txt")
 
 def is_black_channel(channel_name, exact_black, fuzzy_keywords):
     if channel_name in exact_black:
@@ -153,27 +180,29 @@ def is_black_url(url, url_black_list):
             return True
     return False
 
-# ====================== 测速核心【优化：GET真实片段测速+重试机制】 ======================
+# ====================== 测速核心【优化：GET真实片段测速+成功立即跳出重试】 ======================
 def test_single_stream(url, url_black_list):
     if is_black_url(url, url_black_list):
         return (STREAM_REQ_TIMEOUT, url, False, True)
     latency = 999.9
     ok = False
-    # 测速重试循环，成功直接跳出，不浪费请求
+    # 测速重试循环，测速成功直接跳出循环，不浪费多余请求
     for _ in range(STREAM_RETRY_TIMES + 1):
         start = time.perf_counter()
         try:
+            # 使用GET请求获取1024字节片段，替代HEAD，真实模拟播放加载速度
             resp = requests.get(
                 url,
                 timeout=STREAM_REQ_TIMEOUT,
                 allow_redirects=True,
                 verify=False,
-                headers={"Range": "bytes=0-1023"}
+                headers={"Range": "bytes=0-1023"}  # 只拉取开头1KB，减少流量
             )
+            # 仅200/206正常返回码判定有效，多轮跳转、4xx/5xx直接失效
             if resp.status_code in (200, 206):
                 latency = time.perf_counter() - start
                 ok = True
-                break  # 测速成功直接退出循环，无需多余重试
+                break
         except Exception:
             continue
     return (latency, url, ok, False)
@@ -363,6 +392,7 @@ def main():
     # 批量测速（使用优化后的低并发线程数）
     channel_all_test_result = defaultdict(list)
     all_test_tasks = []
+    auto_black_urls = set()  # 存储本次需要自动拉黑的慢链/死链
     for ch_name, urllist in std_channels.items():
         for link in urllist:
             all_test_tasks.append((ch_name, link))
@@ -387,6 +417,11 @@ def main():
                 for s in belong_src_list:
                     source_statistics[s]["black"] += 1
                 continue
+            # 判定是否需要自动拉黑
+            if AUTO_BLACK_DEAD and not ok:
+                auto_black_urls.add(url)
+            if AUTO_BLACK_SLOW and ok and latency >= LATENCY_THRESHOLD:
+                auto_black_urls.add(url)
             channel_all_test_result[ch_name].append((latency, url, ok))
             belong_src_list = url_belong_source.get(url, [])
             for belong_src in belong_src_list:
@@ -396,6 +431,9 @@ def main():
                     else:
                         source_statistics[belong_src]["fallback"] += 1
     print("【全部测速任务执行完成】\n")
+
+    # 测速结束，写入自动黑名单
+    append_auto_black_url(list(auto_black_urls))
 
     # 按模板顺序合并线路（严格遵循模板顺序输出，复用前置加载模板缓存，消除重复IO）
     final_channel_data = OrderedDict()
@@ -487,6 +525,7 @@ def main():
     print(f"DIYP分组文件：{TV_BOX_OUTPUT}")
     print(f"缺量/缺失频道临时白名单：{LOW_LINK_CHANNEL_FILE}")
     print(f"历史存量过滤广告链接总数：{stock_filter_black} 条")
+    print(f"本次自动拉黑慢链/死链总数：{len(auto_black_urls)} 条")
     print("==== IPTV分拣程序全部执行完毕 ====")
 
 if __name__ == "__main__":
