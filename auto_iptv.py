@@ -17,7 +17,7 @@ TV_BOX_OUTPUT = "tv.txt"
 # 测速参数【统一常量】
 STREAM_REQ_TIMEOUT = 3.5
 STREAM_EVAL_WORKERS = 6   # 降低并发，防止容器网络拥堵
-MAX_LINK_PER_CHANNEL = 10
+MAX_LINK_PER_CHANNEL = 8
 FALLBACK_MAX_LINK = 5
 LATENCY_THRESHOLD = 1.2
 # ======================================================
@@ -27,15 +27,16 @@ warnings.filterwarnings("ignore")
 import requests
 requests.packages.urllib3.disable_warnings
 
-# ====================== 新增URL标准化清洗函数 ======================
-def get_standard_url(raw_url: str) -> str:
+# ====================== URL清洗函数：直接返回去除后缀后的干净链接 ======================
+def clean_url_strip_suffix(raw_url: str) -> str:
     """
-    标准化URL，去除线路标记后缀，用于查重对比
-    清除 $LR•xxxx『线路xx』 这类不影响播放的自定义备注
+    彻底清除URL尾部 $ 开头的线路标记后缀，返回纯净播放地址
+    不再保留原始带后缀链接，全流程统一使用清洗后地址
     """
-    # 匹配 $ 开头到行尾的所有自定义线路标记
-    std_url = re.sub(r"\$.*$", "", raw_url.strip())
-    return std_url
+    clean = raw_url.strip()
+    # 匹配 $ 到行尾所有字符直接删除
+    clean = re.sub(r"\$.*$", "", clean)
+    return clean
 # ==================================================================
 
 def load_blacklist():
@@ -147,7 +148,9 @@ def parse_m3u(content):
         elif line.startswith("http"):
             link = line.strip()
             if name:
-                result[name].append(link)
+                # 解析阶段直接清洗，只存入无后缀干净链接，原始带后缀直接丢弃
+                clean_link = clean_url_strip_suffix(link)
+                result[name].append(clean_link)
     return result
 
 def parse_txt(content):
@@ -165,7 +168,9 @@ def parse_txt(content):
             ch_name = ch_name.strip()
             url = url.strip()
             if url.startswith("http"):
-                result[ch_name].append(url)
+                # TXT源同样解析时直接清洗
+                clean_link = clean_url_strip_suffix(url)
+                result[ch_name].append(clean_link)
     return result
 
 # M3U转DIYP标准txt格式工具函数
@@ -185,12 +190,12 @@ def m3u_to_tvbox_txt(m3u_content):
             # 提取频道名称
             if "," in l:
                 curr_ch = l.split(",")[-1].strip()
-                # 匹配所有CCTV-数字开头频道，半角-替换成全角－，不用改模板/白名单
+                # 匹配所有CCTV-数字开头频道，半角-替换成全角－
                 if re.match(r"^CCTV-\d+", curr_ch):
                     curr_ch = curr_ch.replace("-", "－", 1)
         elif l.startswith("http"):
-            # 清除链接尾部$线路备注垃圾字符
-            clean_url = re.sub(r"\$.*", "", l).strip()
+            # 此处链接已经全局清洗过，双重保险再清一次
+            clean_url = clean_url_strip_suffix(l).strip()
             if curr_group not in group_data:
                 group_data[curr_group] = []
             group_data[curr_group].append(f"{curr_ch},{clean_url}")
@@ -221,27 +226,22 @@ def main():
             data = parse_txt(txt)
         print(f"【源解析完成】该源解析出频道数量：{len(data)}")
         for ch, urls in data.items():
+            # urls 已经是清洗后无后缀链接，直接合并
             raw_all_channels[ch].extend(urls)
-    print(f"\n【全部源拉取完毕】原始未清洗频道总数：{len(raw_all_channels)}")
+    print(f"\n【全部源拉取完毕】清洗后原始频道总数：{len(raw_all_channels)}")
 
-    # ====================== 核心优化：源头标准化去重 ======================
-    # 用标准化URL查重，提前剔除带$线路标记的重复链接，大幅减少后续测速任务
+    # ====================== 现在直接对干净URL做普通去重即可，无需二次清洗 ======================
     dedup_raw_channels = defaultdict(list)
     for ch_name, url_list in raw_all_channels.items():
-        seen_std_url = set()
-        unique_urls = []
-        for raw_url in url_list:
-            std_u = get_standard_url(raw_url)
-            if std_u not in seen_std_url:
-                seen_std_url.add(std_u)
-                unique_urls.append(raw_url)
+        # 链接已经无后缀，直接转集合去重
+        unique_urls = list(dict.fromkeys(url_list))
         dedup_raw_channels[ch_name] = unique_urls
-    print(f"【源头URL标准化清洗完成】清洗后待处理频道总数：{len(dedup_raw_channels)}")
+    print(f"【一级去重完成】待处理频道总数：{len(dedup_raw_channels)}")
     # ====================================================================
 
     std_channels = defaultdict(list)
     drop_black_channel_count = 0
-    for raw_name, urllist in dedup_raw_channels.items():  # 替换为清洗后的频道字典
+    for raw_name, urllist in dedup_raw_channels.items():
         std_name = alias_map.get(raw_name, raw_name)
         if is_black_channel(std_name, exact_black, fuzzy_keywords):
             print(f"【频道黑名单剔除】{std_name}")
@@ -249,17 +249,10 @@ def main():
             continue
         if allow_set and std_name not in allow_set:
             continue
-        # 合并链接并二次兜底去重（防止多源同名频道残留重复）
         std_channels[std_name].extend(urllist)
         all_urls = std_channels[std_name]
-        # 复用标准化函数二次查重
-        final_unique = []
-        seen = set()
-        for u in all_urls:
-            su = get_standard_url(u)
-            if su not in seen:
-                seen.add(su)
-                final_unique.append(u)
+        # 干净链接二次兜底去重
+        final_unique = list(dict.fromkeys(all_urls))
         before = len(all_urls)
         after = len(final_unique)
         std_channels[std_name] = final_unique
@@ -348,21 +341,15 @@ def main():
             if not invalid_items:
                 continue
             invalid_items.sort(key=lambda x: x[0])
-            # 兜底线路同样标准化去重
-            seen_std = set()
-            unique_fallback = []
-            for _, u in invalid_items:
-                su = get_standard_url(u)
-                if su not in seen_std:
-                    seen_std.add(su)
-                    unique_fallback.append(u)
+            # 兜底线路链接已无后缀，直接去重
+            unique_fallback = list(dict.fromkeys([u for _, u in invalid_items]))
             output_links = unique_fallback[:FALLBACK_MAX_LINK]
             print(f"【降级兜底】频道[{show_name}] 仅保留备选链接{len(output_links)}条")
             for link in output_links:
                 lines.append(f'#EXTINF:-1 group-title="{group}",{show_name}')
                 lines.append(link)
 
-    # 写入M3U格式 iptv.txt
+    # 写入M3U格式 iptv.txt（所有URL均无$后缀）
     with open(OUTPUT_TXT, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
