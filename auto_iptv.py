@@ -60,7 +60,7 @@ def load_blacklist():
                 else:
                     exact_black.add(line)
     print(f"【黑名单加载完成】精确频道黑名单:{len(exact_black)}条，模糊关键词:{len(fuzzy_keywords)}条，URL广告黑名单:{len(url_black)}条")
-    return exact_black, fuzzy_keywords, url_black_list
+    return exact_black, fuzzy_keywords, url_black
 
 def is_black_channel(channel_name, exact_black, fuzzy_keywords):
     if channel_name in exact_black:
@@ -213,6 +213,13 @@ def main():
     exact_black, fuzzy_keywords, url_black_list = load_blacklist()
     source_urls = fetch_source_urls()
 
+    # ====================== 新增：源维度统计容器 ======================
+    # key: 源url, value: {total:总线路, good:优质达标线路, fallback:兜底线路}
+    source_statistics = defaultdict(lambda: {"total": 0, "good": 0, "fallback": 0})
+    # 绑定每条测试链路归属哪个源
+    task_source_map = {}
+    # ==================================================================
+
     raw_all_channels = defaultdict(list)
     for idx, src in enumerate(source_urls, start=1):
         print(f"\n【{idx}/{len(source_urls)}】正在拉取源: {src}")
@@ -224,9 +231,11 @@ def main():
             data = parse_m3u(txt)
         else:
             data = parse_txt(txt)
-        print(f"【源解析完成】该源解析出频道数量：{len(data)}")
+        # 统计当前源原始总线路数量
+        src_total = sum(len(v) for v in data.values())
+        source_statistics[src]["total"] = src_total
+        print(f"【源解析完成】该源解析出频道数量：{len(data)}，原始线路总数：{src_total}")
         for ch, urls in data.items():
-            # urls 已经是清洗后无后缀链接，直接合并
             raw_all_channels[ch].extend(urls)
     print(f"\n【全部源拉取完毕】清洗后原始频道总数：{len(raw_all_channels)}")
 
@@ -362,6 +371,18 @@ def main():
     print(f"\n【额外生成完成】DIYP专用订阅文件：{TV_BOX_OUTPUT}")
 
     valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, ok in items))
+
+    # ====================== 新增：打印每个源的链路统计报表 ======================
+    print("\n===================== 各订阅源链路检测统计报表 =====================")
+    for source_url, stat in source_statistics.items():
+        print(f"\n订阅源地址：{source_url}")
+        print(f"  原始总线路数量：{stat['total']} 条")
+        print(f"  优质低延迟达标链接：{stat['good']} 条")
+        print(f"  仅兜底可用（超时但连通）链接：{stat['fallback']} 条")
+        print(f"  该源有效可用链接合计：{stat['good'] + stat['fallback']} 条")
+    print("====================================================================\n")
+    # ==========================================================================
+
     print(f"\n========== 执行汇总 ==========")
     print(f"测速存在连通链接的频道总数: {valid_channel_cnt}")
     print(f"template模板内成功输出频道总数: {matched_count}")
