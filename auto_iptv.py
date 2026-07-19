@@ -16,13 +16,13 @@ OLD_IPTV_FILE = "iptv.txt"
 OUTPUT_TXT = "iptv.txt"
 TV_BOX_OUTPUT = "tv.txt"
 
-# 测速业务常量【优化收紧，提升链接速度筛选标准】
-STREAM_REQ_TIMEOUT = 2.0    # 单次请求超时缩短到2秒
-STREAM_RETRY_TIMES = 1     # 测速失败重试1次
-STREAM_REQ_WORKERS = 3     # 降低并发至3，减少网络拥堵虚高延迟
+# 测速业务常量【提速优化，适配GitHub Actions】
+STREAM_REQ_TIMEOUT = 1.2    # 缩短单条等待时长
+STREAM_RETRY_TIMES = 0     # 取消重试，减少重复请求
+STREAM_REQ_WORKERS = 10    # 拉满并发，并行测速
 MAX_LINK_PER_CHANNEL = 8
 FALLBACK_MAX_LINK = 5
-LATENCY_THRESHOLD = 0.8    # 仅延迟≤0.8s才算快速优质线路
+LATENCY_THRESHOLD = 0.8
 MIN_STOCK_LINK = 5
 # ======================================================
 
