@@ -1,4 +1,160 @@
 #EXTM3U x-tvg-url="epg.xml.gz"
+#EXTINF:-1 group-title="央视频道",CCTV-1 综合
+http://204.12.221.218:8181/3m1080p/cctv1.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-1 综合
+http://211.101.246.28:3000/608807420
+#EXTINF:-1 group-title="央视频道",CCTV-1 综合
+http://docker.digital8.top/html/V6.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv01zh
+#EXTINF:-1 group-title="央视频道",CCTV-1 综合
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv01zh
+#EXTINF:-1 group-title="央视频道",CCTV-1 综合
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv1
+#EXTINF:-1 group-title="央视频道",CCTV-1 综合
+http://docker.digital8.top/html/V4.php?access_token=DY0123_SPV4_471051813_V5reC&id=L02_cctv01zh
+#EXTINF:-1 group-title="央视频道",CCTV-2 财经
+http://204.12.221.218:8181/3m1080p/cctv2.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-2 财经
+http://211.101.246.28:3000/631780532
+#EXTINF:-1 group-title="央视频道",CCTV-2 财经
+http://docker.digital8.top/html/V6.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv02jj
+#EXTINF:-1 group-title="央视频道",CCTV-2 财经
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv02jj
+#EXTINF:-1 group-title="央视频道",CCTV-2 财经
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv2
+#EXTINF:-1 group-title="央视频道",CCTV-3 综艺
+http://204.12.221.218:8181/3m1080p/cctv3.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-3 综艺
+http://211.101.246.28:3000/624878271
+#EXTINF:-1 group-title="央视频道",CCTV-3 综艺
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv03zy
+#EXTINF:-1 group-title="央视频道",CCTV-3 综艺
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv3
+#EXTINF:-1 group-title="央视频道",CCTV-4 中文国际
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv04zw
+#EXTINF:-1 group-title="央视频道",CCTV-4 中文国际
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv4
+#EXTINF:-1 group-title="央视频道",CCTV-5 体育
+http://204.12.221.218:8181/3m1080p/cctv5.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-5 体育
+http://211.101.246.28:3000/641886683
+#EXTINF:-1 group-title="央视频道",CCTV-5 体育
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv05ty
+#EXTINF:-1 group-title="央视频道",CCTV-5 体育
+http://docker.digital8.top/html/V4.php?access_token=DY0123_SPV4_471051813_V5reC&id=L02_cctv05ty
+#EXTINF:-1 group-title="央视频道",CCTV-5 体育
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv5
+#EXTINF:-1 group-title="央视频道",CCTV-5+ 体育赛事
+http://204.12.221.218:8181/3m1080p/cctv5p.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-5+ 体育赛事
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv05pl
+#EXTINF:-1 group-title="央视频道",CCTV-5+ 体育赛事
+http://211.101.246.28:3000/641886773
+#EXTINF:-1 group-title="央视频道",CCTV-5+ 体育赛事
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv5p
+#EXTINF:-1 group-title="央视频道",CCTV-6 电影
+http://204.12.221.218:8181/3m1080p/cctv6.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-6 电影
+http://211.101.246.28:3000/624878396
+#EXTINF:-1 group-title="央视频道",CCTV-6 电影
+http://txycdn7.video.qq.com/1755771402.m3u8?time=1784389362&from=player&cdn=tcloud&sdtfrom=v401010931632&platform=4010603&butype=31&HLSP2P=1&vkey=nvkey_AQQgIAf7wS61ITY-ZMoOCEtWoRHkIqIUE5HhIibqD_qi79n1EJWWjYVlLk52OIbzIp0br2gBcAQOjIEUiKpWYF17FMgcymimK9QOfbJAE6Uh3Eg8KML-wCen4b_AIGv3_ciFgL0ef4QOnVnmEJKKAu1UlsbRvi2iHSu3gwXrLgLAJ4dqQUlVovIdR9AQct97OkGN_AkMGpPOuj_nsdb5rugm5HcJ8jyW90JMybSRu90Yv6s2Dkd45X2NoPcISppsycb2w2LoaH0WjFNzj1f-en2DBFYNr1azFItiSyg6j0WQM7fA8zx1nFk1bsXgLPWe-8QQqdNefhqa_OHrFX-N4o0IFR1sLIDnPmctqFKkKYbFZIHmCoMZVXwkQdmM175lF5U9LLfZ47Ypb7RSJ4jFJ_zhloLDqFDIZUnsSJJL3Ff6UdYcHbLU6t9wSo9mbTLQWCehN-_zPNO4oGVR0zyccMJPAaUq1Z4IUyoAsUNrfmJ8SDD7ooQA3FEZqdXJkAiGXBWCTLbv7QmxZei46sD5GkYfRi7iDPlEZCiuBd7k5a-qfeO5cO_1&drmtype=0
+#EXTINF:-1 group-title="央视频道",CCTV-6 电影
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv06dy
+#EXTINF:-1 group-title="央视频道",CCTV-6 电影
+http://docker.digital8.top/html/V6.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv06dy
+#EXTINF:-1 group-title="央视频道",CCTV-6 电影
+http://docker.digital8.top/html/V4.php?access_token=DY0123_SPV4_471051813_V5reC&id=L02_cctv06dy
+#EXTINF:-1 group-title="央视频道",CCTV-6 电影
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv6
+#EXTINF:-1 group-title="央视频道",CCTV-7 国防军事
+http://204.12.221.218:8181/3m1080p/cctv7.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-7 国防军事
+http://docker.digital8.top/html/V6.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv07js
+#EXTINF:-1 group-title="央视频道",CCTV-7 国防军事
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv07js
+#EXTINF:-1 group-title="央视频道",CCTV-7 国防军事
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv7
+#EXTINF:-1 group-title="央视频道",CCTV-8 电视剧
+http://204.12.221.218:8181/3m1080p/cctv8.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-8 电视剧
+http://211.101.246.28:3000/624878356
+#EXTINF:-1 group-title="央视频道",CCTV-8 电视剧
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv08dsj
+#EXTINF:-1 group-title="央视频道",CCTV-8 电视剧
+http://docker.digital8.top/html/V6.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv08dsj
+#EXTINF:-1 group-title="央视频道",CCTV-8 电视剧
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv8
+#EXTINF:-1 group-title="央视频道",CCTV-9 纪录
+http://204.12.221.218:8181/3m1080p/cctv9.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-9 纪录
+http://211.101.246.28:3000/673168140
+#EXTINF:-1 group-title="央视频道",CCTV-9 纪录
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv09jl
+#EXTINF:-1 group-title="央视频道",CCTV-9 纪录
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv9
+#EXTINF:-1 group-title="央视频道",CCTV-10 科教
+http://204.12.221.218:8181/3m1080p/cctv10.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-10 科教
+http://211.101.246.28:3000/624878405
+#EXTINF:-1 group-title="央视频道",CCTV-10 科教
+http://docker.digital8.top/html/V6.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv10jy
+#EXTINF:-1 group-title="央视频道",CCTV-10 科教
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv10jy
+#EXTINF:-1 group-title="央视频道",CCTV-10 科教
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv10
+#EXTINF:-1 group-title="央视频道",CCTV-11 戏曲
+http://204.12.221.218:8181/3m1080p/cctv11.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-11 戏曲
+http://211.101.246.28:3000/667987558
+#EXTINF:-1 group-title="央视频道",CCTV-11 戏曲
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv11xq
+#EXTINF:-1 group-title="央视频道",CCTV-11 戏曲
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv11
+#EXTINF:-1 group-title="央视频道",CCTV-12 社会与法
+http://204.12.221.218:8181/3m1080p/cctv12.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-12 社会与法
+http://docker.digital8.top/html/V6.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv12sf
+#EXTINF:-1 group-title="央视频道",CCTV-12 社会与法
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv12sf
+#EXTINF:-1 group-title="央视频道",CCTV-12 社会与法
+http://211.101.246.28:3000/673168185
+#EXTINF:-1 group-title="央视频道",CCTV-12 社会与法
+http://docker.digital8.top/html/V4.php?access_token=DY0123_SPV4_471051813_V5reC&id=L02_cctv12sf
+#EXTINF:-1 group-title="央视频道",CCTV-12 社会与法
+http://docker.digital8.top/html/V4back.php?/PLTV/&ip=0&access_token=DY0123_SPV4_471051813_V5reC&id=cctv12
+#EXTINF:-1 group-title="央视频道",CCTV-13 新闻
+http://204.12.221.218:8181/3m1080p/cctv13.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-13 新闻
+http://211.101.246.28:3000/608807423
+#EXTINF:-1 group-title="央视频道",CCTV-13 新闻
+http://docker.digital8.top/html/V6.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv13xw
+#EXTINF:-1 group-title="央视频道",CCTV-13 新闻
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv13xw
+#EXTINF:-1 group-title="央视频道",CCTV-13 新闻
+http://docker.digital8.top/html/V4.php?access_token=DY0123_SPV4_471051813_V5reC&id=L02_cctv13xw
+#EXTINF:-1 group-title="央视频道",CCTV-14 少儿
+http://211.101.246.28:3000/624878440
+#EXTINF:-1 group-title="央视频道",CCTV-14 少儿
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv14se
+#EXTINF:-1 group-title="央视频道",CCTV-14 少儿
+http://204.12.221.218:8181/3m1080p/cctv14.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-15 音乐
+http://204.12.221.218:8181/3m1080p/cctv15.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-15 音乐
+http://211.101.246.28:3000/673168223
+#EXTINF:-1 group-title="央视频道",CCTV-15 音乐
+http://docker.digital8.top/html/V4.php?access_token=DY0123_SPV4_471051813_V5reC&id=L02_cctv15yy
+#EXTINF:-1 group-title="央视频道",CCTV-16 奥林匹克
+http://204.12.221.218:8181/3m1080p/cctv16.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-16 奥林匹克
+http://docker.digital8.top/html/V6.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv16ay
+#EXTINF:-1 group-title="央视频道",CCTV-17 农业农村
+http://204.12.221.218:8181/3m1080p/cctv17.m3u8
+#EXTINF:-1 group-title="央视频道",CCTV-17 农业农村
+http://211.101.246.28:3000/673168256
+#EXTINF:-1 group-title="央视频道",CCTV-17 农业农村
+http://docker.digital8.top/html/V6.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv17ny
+#EXTINF:-1 group-title="央视频道",CCTV-17 农业农村
+http://docker.digital8.top/html/V4YD.php?access_token=DY0123_SPV4_471051813_V5reC&id=cctv17ny
 #EXTINF:-1 group-title="央视频道",CCTV-4K
 http://[2409:8087:2001:20:2800:0:df6e:eb26]:80/ott.mobaibox.com/PLTV/3/224/3221228472/index.m3u8
 #EXTINF:-1 group-title="央视频道",CCTV-4K
