@@ -27,6 +27,17 @@ warnings.filterwarnings("ignore")
 import requests
 requests.packages.urllib3.disable_warnings
 
+# ====================== 新增URL标准化清洗函数 ======================
+def get_standard_url(raw_url: str) -> str:
+    """
+    标准化URL，去除线路标记后缀，用于查重对比
+    清除 $LR•xxxx『线路xx』 这类不影响播放的自定义备注
+    """
+    # 匹配 $ 开头到行尾的所有自定义线路标记
+    std_url = re.sub(r"\$.*$", "", raw_url.strip())
+    return std_url
+# ==================================================================
+
 def load_blacklist():
     exact_black = set()
     fuzzy_keywords = []
@@ -48,7 +59,7 @@ def load_blacklist():
                 else:
                     exact_black.add(line)
     print(f"【黑名单加载完成】精确频道黑名单:{len(exact_black)}条，模糊关键词:{len(fuzzy_keywords)}条，URL广告黑名单:{len(url_black)}条")
-    return exact_black, fuzzy_keywords, url_black
+    return exact_black, fuzzy_keywords, url_black_list
 
 def is_black_channel(channel_name, exact_black, fuzzy_keywords):
     if channel_name in exact_black:
@@ -192,7 +203,6 @@ def m3u_to_tvbox_txt(m3u_content):
 
 def main():
     print("========== IPTV分拣程序开始运行 ==========")
-    # 修复点：调整加载顺序，allow_set提前定义，解决NameError
     alias_map = load_alias()
     allow_set = load_allow_list()
     exact_black, fuzzy_keywords, url_black_list = load_blacklist()
@@ -212,27 +222,49 @@ def main():
         print(f"【源解析完成】该源解析出频道数量：{len(data)}")
         for ch, urls in data.items():
             raw_all_channels[ch].extend(urls)
-    print(f"\n【全部源拉取完毕】原始未去重频道总数：{len(raw_all_channels)}")
+    print(f"\n【全部源拉取完毕】原始未清洗频道总数：{len(raw_all_channels)}")
+
+    # ====================== 核心优化：源头标准化去重 ======================
+    # 用标准化URL查重，提前剔除带$线路标记的重复链接，大幅减少后续测速任务
+    dedup_raw_channels = defaultdict(list)
+    for ch_name, url_list in raw_all_channels.items():
+        seen_std_url = set()
+        unique_urls = []
+        for raw_url in url_list:
+            std_u = get_standard_url(raw_url)
+            if std_u not in seen_std_url:
+                seen_std_url.add(std_u)
+                unique_urls.append(raw_url)
+        dedup_raw_channels[ch_name] = unique_urls
+    print(f"【源头URL标准化清洗完成】清洗后待处理频道总数：{len(dedup_raw_channels)}")
+    # ====================================================================
 
     std_channels = defaultdict(list)
     drop_black_channel_count = 0
-    for raw_name, urllist in raw_all_channels.items():
+    for raw_name, urllist in dedup_raw_channels.items():  # 替换为清洗后的频道字典
         std_name = alias_map.get(raw_name, raw_name)
         if is_black_channel(std_name, exact_black, fuzzy_keywords):
             print(f"【频道黑名单剔除】{std_name}")
             drop_black_channel_count += 1
             continue
-        # 此时allow_set已提前加载，不会报未定义
         if allow_set and std_name not in allow_set:
             continue
-        # 合并链接并去重
+        # 合并链接并二次兜底去重（防止多源同名频道残留重复）
         std_channels[std_name].extend(urllist)
         all_urls = std_channels[std_name]
+        # 复用标准化函数二次查重
+        final_unique = []
+        seen = set()
+        for u in all_urls:
+            su = get_standard_url(u)
+            if su not in seen:
+                seen.add(su)
+                final_unique.append(u)
         before = len(all_urls)
-        std_channels[std_name] = list(dict.fromkeys(all_urls))
-        after = len(std_channels)
+        after = len(final_unique)
+        std_channels[std_name] = final_unique
         if before > after:
-            print(f"【频道去重】{std_name} 清除重复线路 {before - after} 条")
+            print(f"【频道二次去重】{std_name} 清除重复线路 {before - after} 条")
     print(f"【频道预处理结束】黑名单丢弃频道总数:{drop_black_channel_count}，进入测速频道总数:{len(std_channels)}")
 
     channel_all_test_result = defaultdict(list)
@@ -316,7 +348,14 @@ def main():
             if not invalid_items:
                 continue
             invalid_items.sort(key=lambda x: x[0])
-            unique_fallback = list(dict.fromkeys([u for _, u in invalid_items]))
+            # 兜底线路同样标准化去重
+            seen_std = set()
+            unique_fallback = []
+            for _, u in invalid_items:
+                su = get_standard_url(u)
+                if su not in seen_std:
+                    seen_std.add(su)
+                    unique_fallback.append(u)
             output_links = unique_fallback[:FALLBACK_MAX_LINK]
             print(f"【降级兜底】频道[{show_name}] 仅保留备选链接{len(output_links)}条")
             for link in output_links:
