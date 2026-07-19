@@ -17,7 +17,7 @@ OUTPUT_TXT = "iptv.txt"
 TV_BOX_OUTPUT = "tv.txt"
 
 # 测速业务常量【提速优化，适配GitHub Actions】
-STREAM_REQ_TIMEOUT = 1.2    # 缩短单条等待时长
+STREAM_REQ_TIMEOUT = 0.8    # 缩短单条等待时长
 STREAM_RETRY_TIMES = 0     # 取消重试，减少重复请求
 STREAM_REQ_WORKERS = 10    # 拉满并发，并行测速
 MAX_LINK_PER_CHANNEL = 8
@@ -412,7 +412,6 @@ def main():
             if hit_url_black or finished % 20 == 0:
                 print(f"【测速进度 {finished}/{total_task_num}】")
             if hit_url_black:
-                print(f"  >> 【广告URL过滤】{url}")
                 belong_src_list = url_belong_source.get(url, [])
                 for s in belong_src_list:
                     source_statistics[s]["black"] += 1
