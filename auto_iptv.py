@@ -19,7 +19,7 @@ TV_BOX_OUTPUT = "tv.txt"
 # 测速业务常量【提速优化，适配GitHub Actions】
 STREAM_REQ_TIMEOUT = 0.8    # 缩短单条等待时长
 STREAM_RETRY_TIMES = 0     # 取消重试，减少重复请求
-STREAM_REQ_WORKERS = 10    # 拉满并发，并行测速
+STREAM_REQ_WORKERS = 4    # 拉满并发，并行测速
 MAX_LINK_PER_CHANNEL = 8
 FALLBACK_MAX_LINK = 5
 LATENCY_THRESHOLD = 1.2    # ≥1.2s 判定为慢速链，自动拉黑
@@ -32,6 +32,13 @@ import warnings
 warnings.filterwarnings("ignore")
 import requests
 requests.packages.urllib3.disable_warnings
+
+# ====================== 全局请求会话复用，减少TCP端口占用 ======================
+SESSION = requests.Session()
+SESSION.max_redirects = 3  # 限制最大跳转次数，减少无效请求
+# 统一全局请求头，避免重复创建
+SESSION.headers.update({"Range": "bytes=0-1023"})
+# ==========================================================================
 
 # ====================== URL清洗工具 ======================
 def clean_url_strip_suffix(raw_url: str) -> str:
@@ -191,13 +198,13 @@ def test_single_stream(url, url_black_list):
         start = time.perf_counter()
         try:
             # 使用GET请求获取1024字节片段，替代HEAD，真实模拟播放加载速度
-            resp = requests.get(
+            resp = SESSION.get(
                 url,
                 timeout=STREAM_REQ_TIMEOUT,
                 allow_redirects=True,
                 verify=False,
-                headers={"Range": "bytes=0-1023"}  # 只拉取开头1KB，减少流量
-            )
+                headers={"Range": "bytes=0-1023"}
+           )
             # 仅200/206正常返回码判定有效，多轮跳转、4xx/5xx直接失效
             if resp.status_code in (200, 206):
                 latency = time.perf_counter() - start
