@@ -27,3 +27,6 @@ https://wget.la/https://github.com/Kimentanm/aptv/raw/master/m3u/iptv.m3u
 https://live.zbds.top/tv/iptv4.txt
 https://gh-proxy.com/https://raw.githubusercontent.com/kakaxi-1/IPTV/main/ipv4.txt
 http://8.138.7.223/live.txt
+https://gh-proxy.org/github.com/ioptu/migu_video/raw/refs/heads/main/migu.m3u
+https://raw.githubusercontent.com/ioptu/migu_video/refs/heads/main/IPTV.txt
+https://develop202.github.io/migu_video/interface.txt
