@@ -213,11 +213,11 @@ def main():
     exact_black, fuzzy_keywords, url_black_list = load_blacklist()
     source_urls = fetch_source_urls()
 
-    # ====================== 新增：源维度统计容器 ======================
-    # key: 源url, value: {total:总线路, good:优质达标线路, fallback:兜底线路}
-    source_statistics = defaultdict(lambda: {"total": 0, "good": 0, "fallback": 0})
-    # 绑定每条测试链路归属哪个源
-    task_source_map = {}
+    # ====================== 源维度统计容器 ======================
+    # key: 源url, value: {total:总线路, good:优质达标线路, fallback:兜底线路, black:广告过滤线路}
+    source_statistics = defaultdict(lambda: {"total": 0, "good": 0, "fallback": 0, "black": 0})
+    # 修复：一条URL可能属于多个源，使用列表存储全部归属源
+    url_belong_source = defaultdict(list)
     # ==================================================================
 
     raw_all_channels = defaultdict(list)
@@ -226,6 +226,7 @@ def main():
         txt = download_text(src)
         if not txt:
             print(f"【跳过】该源无返回内容")
+            source_statistics[src]["total"] = 0
             continue
         if "#EXTM3U" in txt:
             data = parse_m3u(txt)
@@ -236,17 +237,18 @@ def main():
         source_statistics[src]["total"] = src_total
         print(f"【源解析完成】该源解析出频道数量：{len(data)}，原始线路总数：{src_total}")
         for ch, urls in data.items():
+            for u in urls:
+                # 绑定这条干净url归属当前src，支持多源重复URL
+                url_belong_source[u].append(src)
             raw_all_channels[ch].extend(urls)
     print(f"\n【全部源拉取完毕】清洗后原始频道总数：{len(raw_all_channels)}")
 
-    # ====================== 现在直接对干净URL做普通去重即可，无需二次清洗 ======================
+    # 对干净URL做普通去重
     dedup_raw_channels = defaultdict(list)
     for ch_name, url_list in raw_all_channels.items():
-        # 链接已经无后缀，直接转集合去重
         unique_urls = list(dict.fromkeys(url_list))
         dedup_raw_channels[ch_name] = unique_urls
     print(f"【一级去重完成】待处理频道总数：{len(dedup_raw_channels)}")
-    # ====================================================================
 
     std_channels = defaultdict(list)
     drop_black_channel_count = 0
@@ -289,10 +291,23 @@ def main():
             finished += 1
             if hit_url_black or finished % 20 == 0:
                 print(f"【测速进度 {finished}/{total_task_num}】已完成链接测速")
+            # 命中URL黑名单，归属源全部black计数+1
             if hit_url_black:
                 print(f"  >> 【URL黑名单剔除广告链接】{url}")
+                belong_src_list = url_belong_source.get(url, [])
+                for s in belong_src_list:
+                    source_statistics[s]["black"] += 1
                 continue
             channel_all_test_result[ch_name].append((latency, url, ok))
+
+            # 反向匹配归属源，累加优质/兜底统计，多源同URL全部计数
+            belong_src_list = url_belong_source.get(url, [])
+            for belong_src in belong_src_list:
+                if ok:
+                    if latency <= LATENCY_THRESHOLD:
+                        source_statistics[belong_src]["good"] += 1
+                    else:
+                        source_statistics[belong_src]["fallback"] += 1
     print("【全部测速任务执行完毕】\n")
 
     lines = ["#EXTM3U x-tvg-url=\"epg.xml.gz\""]
@@ -350,7 +365,6 @@ def main():
             if not invalid_items:
                 continue
             invalid_items.sort(key=lambda x: x[0])
-            # 兜底线路链接已无后缀，直接去重
             unique_fallback = list(dict.fromkeys([u for _, u in invalid_items]))
             output_links = unique_fallback[:FALLBACK_MAX_LINK]
             print(f"【降级兜底】频道[{show_name}] 仅保留备选链接{len(output_links)}条")
@@ -370,25 +384,25 @@ def main():
         wf.write(tvbox_text)
     print(f"\n【额外生成完成】DIYP专用订阅文件：{TV_BOX_OUTPUT}")
 
-    valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, ok in items))
+    valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, _, ok in items))
 
-    # ====================== 新增：打印每个源的链路统计报表 ======================
+    # ====================== 各订阅源链路检测统计报表 ======================
     print("\n===================== 各订阅源链路检测统计报表 =====================")
     for source_url, stat in source_statistics.items():
-        print(f"\n订阅源地址：{source_url}")
-        print(f"  原始总线路数量：{stat['total']} 条")
-        print(f"  优质低延迟达标链接：{stat['good']} 条")
-        print(f"  仅兜底可用（超时但连通）链接：{stat['fallback']} 条")
-        print(f"  该源有效可用链接合计：{stat['good'] + stat['fallback']} 条")
+        print(f"\n【订阅源】{source_url}")
+        print(f"  ① 原始抓取总线路：{stat['total']} 条")
+        print(f"  ② 广告黑名单过滤线路：{stat['black']} 条")
+        print(f"  ③ 优质低延迟达标链接：{stat['good']} 条")
+        print(f"  ④ 超时兜底可用链接：{stat['fallback']} 条")
+        print(f"  ✅ 该源有效可用链接合计：{stat['good'] + stat['fallback']} 条")
     print("====================================================================\n")
-    # ==========================================================================
 
-    print(f"\n========== 执行汇总 ==========")
-    print(f"测速存在连通链接的频道总数: {valid_channel_cnt}")
+    print(f"\n========== 全局执行汇总 ==========")
+    print(f"存在可用连通链路的频道总数: {valid_channel_cnt}")
     print(f"template模板内成功输出频道总数: {matched_count}")
-    print(f"M3U通用文件：{OUTPUT_TXT}")
+    print(f"标准M3U输出文件：{OUTPUT_TXT}")
     print(f"DIYP专用分组文件：{TV_BOX_OUTPUT}")
-    print("==== IPTV分拣程序全部结束 ====")
+    print("==== IPTV分拣程序全部执行完毕 ====")
 
 if __name__ == "__main__":
     main()
