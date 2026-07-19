@@ -11,7 +11,7 @@ env:
 jobs:
   Update:
     runs-on: ubuntu-latest
-    timeout-minutes: 55  # 55分钟主动终止，避免占用资源
+    timeout-minutes: 180  # 180分钟主动终止，避免占用资源
     permissions:
       contents: write
       pages: write       # 新增：Pages部署权限
