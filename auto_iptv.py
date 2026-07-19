@@ -42,13 +42,15 @@ def parse_old_iptv_stock():
     返回：
     stock_map: {频道名: [(latency, url, is_good)]} 存量链路带分层标记
     low_channel_set: 存量<5条的缺量频道集合
+    full_stock_channel_set: 所有历史频道集合
     自动生成 config/low_link_channel.txt
     """
     stock_map = defaultdict(list)
     low_channel_set = set()
+    full_stock_channel_set = set()
     if not os.path.exists(OLD_IPTV_FILE):
         print(f"【提示】未找到历史文件 {OLD_IPTV_FILE}，全部频道判定为缺量频道")
-        return stock_map, low_channel_set
+        return stock_map, low_channel_set, full_stock_channel_set
 
     with open(OLD_IPTV_FILE, "r", encoding="utf-8") as f:
         lines = f.readlines()
@@ -57,6 +59,7 @@ def parse_old_iptv_stock():
         line = line.strip()
         if line.startswith("#EXTINF") and "," in line:
             curr_ch = line.split(",")[-1].strip()
+            full_stock_channel_set.add(curr_ch)
         elif line.startswith("http") and curr_ch:
             clean_u = clean_url_strip_suffix(line)
             # 存量历史链路无实时测速，统一标记为兜底后置
@@ -73,7 +76,7 @@ def parse_old_iptv_stock():
         for ch in sorted(low_channel_set):
             f.write(ch + "\n")
     print(f"【临时白名单生成】路径：{LOW_LINK_CHANNEL_FILE}")
-    return stock_map, low_channel_set
+    return stock_map, low_channel_set, full_stock_channel_set
 
 # ====================== 黑名单工具 ======================
 def load_blacklist():
@@ -243,7 +246,7 @@ def m3u_to_tvbox_txt(m3u_content):
 def main():
     print("========== IPTV定时分拣程序启动 ==========")
     # 步骤1：读取历史iptv，拆分充足/缺量频道，生成临时白名单
-    stock_channel_map, low_channel_set = parse_old_iptv_stock()
+    stock_channel_map, low_channel_set, full_stock_channel_set = parse_old_iptv_stock()
 
     alias_map = load_alias()
     exact_black, fuzzy_keywords, url_black_list = load_blacklist()
@@ -374,7 +377,7 @@ def main():
                 channel_info[std_name] = (display_name, group_name)
     else:
         # 模板文件缺失兜底：使用存量频道名作为展示名、默认分组
-        template_queue = list(stock_channel_map.keys())
+        template_queue = list(full_stock_channel_set)
         for ch in template_queue:
             channel_info[ch] = (ch, "默认分组")
     print(f"【频道模板加载】待输出频道模板总量：{len(template_queue)}")
@@ -383,32 +386,42 @@ def main():
     final_channel_data = OrderedDict()
     matched_count = 0
 
+    # 遍历模板内全部历史频道（包含充足+缺量两类，修复合格频道丢失问题）
     for std_name in template_queue:
+        # 跳过黑名单频道
+        if is_black_channel(std_name, exact_black, fuzzy_keywords):
+            continue
         show_name, group = channel_info[std_name]
-        # 1. 读取历史存量全部链路
+        # 1. 获取旧文件存量线路
         stock_info_list = stock_channel_map.get(std_name, [])
         stock_url_set = set(u for _, u, _ in stock_info_list)
+        stock_count = len(stock_info_list)
 
-        # 2. 读取本轮测速新链路，过滤与存量重复的URL
-        new_test_items = channel_all_test_result.get(std_name, [])
-        new_good = []
-        new_fallback = []
-        for lat, u, ok in new_test_items:
-            if not ok:
-                continue
-            if u in stock_url_set:
-                continue
-            if lat <= LATENCY_THRESHOLD:
-                new_good.append((lat, u))
-            else:
-                new_fallback.append((lat, u))
-        # 新链路按延迟升序排序
-        new_good.sort(key=lambda x: x[0])
-        new_fallback.sort(key=lambda x: x[0])
+        # 判断是否缺量频道
+        if std_name in low_channel_set:
+            # 缺量频道：合并存量+新抓取测速线路
+            new_test_items = channel_all_test_result.get(std_name, [])
+            new_good = []
+            new_fallback = []
+            for lat, u, ok in new_test_items:
+                if not ok:
+                    continue
+                if u in stock_url_set:
+                    continue  # 跳过与存量重复的链接
+                if lat <= LATENCY_THRESHOLD:
+                    new_good.append((lat, u, True))
+                else:
+                    new_fallback.append((lat, u, False))
+            # 新线路按延迟排序
+            new_good.sort(key=lambda x: x[0])
+            new_fallback.sort(key=lambda x: x[0])
+            # 合并分层规则：新优质 > 新兜底 > 历史存量
+            merge_all = new_good + new_fallback + stock_info_list
+        else:
+            # 存量≥5充足频道：不抓取新线路，直接使用原有存量链路
+            merge_all = stock_info_list
 
-        # 合并分层规则：新优质 > 新兜底 > 历史存量链路
-        merge_all = new_good + new_fallback + stock_info_list
-        # 全局二次URL去重（防止多源抓取重复新链接）
+        # 全局二次URL去重
         unique_check = []
         exist_url = set()
         for item in merge_all:
@@ -424,7 +437,7 @@ def main():
             continue
         matched_count += 1
         final_channel_data[std_name] = (show_name, group, final_items)
-        print(f"【频道合并完成】[{show_name}] 最终留存线路 {len(final_items)} 条")
+        print(f"【频道合并完成】[{show_name}] 最终留存线路{len(final_items)}条（原有存量：{stock_count}条）")
 
     # 组装标准M3U文本
     lines = ["#EXTM3U x-tvg-url=\"epg.xml.gz\""]
@@ -437,7 +450,7 @@ def main():
     with open(OUTPUT_TXT, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
 
-    # 转换DIYP专用tv.txt
+    # 转换DIYP tv.txt
     with open(OUTPUT_TXT, "r", encoding="utf-8") as rf:
         m3u_full = rf.read()
     tvbox_text = m3u_to_tvbox_txt(m3u_full)
