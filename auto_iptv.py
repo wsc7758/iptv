@@ -4,15 +4,14 @@ import sys
 import time
 import traceback
 from collections import defaultdict, OrderedDict
-from concurrent.futures import ThreadPoolExecutor, as_completed, TimeoutError
+from concurrent.futures import ThreadPoolExecutor
 import warnings
 import requests
 
-# ====================== 全局常量（统一管理，无冗余） ======================
+# ====================== 全局常量 ======================
 BASE_PATH = "config/"
 SOURCES_FILE = os.path.join(BASE_PATH, "sources.txt")
 ALIAS_FILE = os.path.join(BASE_PATH, "alias.txt")
-ALLOW_LIST_FILE = os.path.join(BASE_PATH, "allow_list.txt")
 TEMPLATE_OUTPUT_FILE = os.path.join(BASE_PATH, "template_output.txt")
 BLACKLIST_FILE = os.path.join(BASE_PATH, "blacklist.txt")
 LOW_LINK_CHANNEL_FILE = os.path.join(BASE_PATH, "low_link_channel.txt")
@@ -20,13 +19,13 @@ OLD_IPTV_FILE = "iptv.txt"
 OUTPUT_TXT = "iptv.txt"
 TV_BOX_OUTPUT = "tv.txt"
 
-# 测速参数（沿用原有配置，无改动）
+# 测速参数
 STREAM_CONNECT_TIMEOUT = 0.8
 STREAM_REQ_TIMEOUT = 1.5
 STREAM_WORKERS = 2
 MIN_STOCK_LINK = 4
 BATCH_SIZE = 4
-BATCH_TIMEOUT = 18
+BATCH_MAX_COST = 18  # 单批总耗时上限，不再作为as_completed超时
 RETRY_BATCH_SIZE = 2
 RETRY_BATCH_TIMEOUT = 20
 MAX_RETRY_POOL = 200
@@ -40,15 +39,12 @@ requests.packages.urllib3.disable_warnings()
 
 # ====================== 通用工具函数 ======================
 def print_log(msg: str):
-    """统一日志打印，全局只写一次flush"""
     print(msg, flush=True)
 
 def clean_url(url: str) -> str:
-    """清洗URL后缀符号"""
     return re.sub(r"\$.*$", "", url.strip())
 
 def is_black_url(url: str, black_list: list) -> bool:
-    """URL黑名单校验+垃圾域名前置校验合并"""
     for d in BAD_DOMAIN:
         if d in url:
             return True
@@ -57,65 +53,60 @@ def is_black_url(url: str, black_list: list) -> bool:
             return True
     return False
 
-def _safe_collect_unfinished(future_map, task_store, result_list):
-    """独立子线程执行收集，不阻塞主线程日志"""
-    tmp = []
-    for f in future_map:
-        if not f.done():
-            tmp.append(task_store[f])
-    result_list.extend(tmp)
-
-def batch_run_tasks(task_list, task_func, url_black, batch_size, batch_timeout, workers, total_all):
-    """统一测速/重试执行器，三层隔离彻底解决超时卡死
-    核心改动：批次超时立刻关闭线程池，收集任务丢子线程，超时链接全部丢弃不重试
+def batch_run_tasks(task_list, task_func, url_black, batch_size, batch_max_cost, workers, total_all):
+    """
+    全新无阻塞批次执行器：彻底移除as_completed批量timeout，不遍历未完成future
+    逻辑：逐条接收完成任务，计时超标直接终止本批，丢弃所有剩余任务，零阻塞收集
     """
     finish_count = 0
     task_result = defaultdict(list)
-    timeout_remain = []
-
     total = len(task_list)
+
     for batch_idx, start in enumerate(range(0, total, batch_size), 1):
         batch = task_list[start:start + batch_size]
         end = min(start + batch_size, total)
         print_log(f"\n===== 第{batch_idx}批测速：{start+1} ~ {end} / {total_all} =====")
 
+        batch_start_time = time.perf_counter()
         pool = ThreadPoolExecutor(max_workers=workers)
-        future_map = {}
-        task_store = {}
-        for ch, link in batch:
-            f = pool.submit(task_func, link, url_black)
-            future_map[f] = ch
-            task_store[f] = (ch, link)
-        try:
-            for fut in as_completed(future_map, timeout=batch_timeout):
-                ch_name = future_map[fut]
-                url = task_store[fut][1]
-                try:
-                    latency, link_ok, hit_black = fut.result(timeout=1)
-                except Exception:
-                    latency = STREAM_REQ_TIMEOUT
-                    link_ok = False
-                    hit_black = False
-                finish_count += 1
-                if hit_black or finish_count % 50 == 0:
-                    print_log(f"【总测速进度 {finish_count}/{total_all}】")
-                if hit_black:
+        task_store = {pool.submit(task_func, link, url_black): (ch, link) for ch, link in batch}
+        completed = set()
+
+        # 循环接收已完成任务，不设置整批超时，靠单条请求快速失败
+        while len(completed) < len(task_store):
+            # 每轮只等0.3s，持续刷新日志，无长时间阻塞
+            try:
+                fut = next((f for f in task_store if f.done() and f not in completed), None)
+                if fut is None:
+                    time.sleep(0.3)
+                    # 检测本批总耗时是否超限
+                    if time.perf_counter() - batch_start_time > batch_max_cost:
+                        print_log(f"⚠️ 第{batch_idx}批总耗时超过{batch_max_cost}s上限，直接丢弃所有未完成链接，跳过残留任务")
+                        break
                     continue
-                task_result[ch_name].append((latency, url, link_ok))
-        except TimeoutError:
-            print_log(f"⚠️ 第{batch_idx}批超过限时，立刻关闭线程池释放阻塞网络线程")
-            # 1. 强制关闭线程池，终止所有卡死网络请求
-            pool.shutdown(wait=False, cancel_futures=True)
-            # 2. 新开独立子线程收集未完成任务，主线程持续打印日志不阻塞
-            from threading import Thread
-            temp_unfinished = []
-            t = Thread(target=_safe_collect_unfinished, args=(future_map, task_store, temp_unfinished))
-            t.start()
-            t.join(timeout=1.0)
-            print_log(f"⚠️ 本批{len(temp_unfinished)}条超时链接全部直接丢弃，不加入重试池避免连环卡死")
-        # 正常批次无超时，安全关闭线程池
-        pool.shutdown(wait=True)
-    return task_result, timeout_remain, finish_count
+            except StopIteration:
+                time.sleep(0.3)
+                continue
+
+            # 处理已完成任务
+            completed.add(fut)
+            ch_name, url = task_store[fut]
+            try:
+                latency, link_ok, hit_black = fut.result(timeout=0.5)
+            except Exception:
+                latency = STREAM_REQ_TIMEOUT
+                link_ok = False
+                hit_black = False
+            finish_count += 1
+            if hit_black or finish_count % 50 == 0:
+                print_log(f"【总测速进度 {finish_count}/{total_all}】")
+            if hit_black:
+                continue
+            task_result[ch_name].append((latency, url, link_ok))
+
+        # 直接销毁线程池，完全不遍历未完成future，无任何阻塞判断
+        pool.shutdown(wait=False, cancel_futures=True)
+    return task_result, [], finish_count
 
 # ====================== 业务独立函数 ======================
 def load_black_list():
@@ -161,14 +152,11 @@ def load_stock_channels(url_black):
 
 def build_need_test_list(stock_map, template_channel_set, all_stock_set):
     need_test = set()
-    # 全新频道（存量不存在）
     new_ch = template_channel_set - all_stock_set
     need_test.update(new_ch)
-    # 存量不足MIN_STOCK_LINK的频道
     for ch, link_list in stock_map.items():
         if len(link_list) < MIN_STOCK_LINK and ch in template_channel_set:
             need_test.add(ch)
-    # 写入临时白名单
     with open(LOW_LINK_CHANNEL_FILE, "w", encoding="utf-8") as f:
         for ch in sorted(need_test):
             f.write(f"{ch}\n")
@@ -251,7 +239,6 @@ def parse_m3u_or_txt(content: str):
     return ch_link_map
 
 def test_single_link(url: str, url_black: list):
-    """单条链接测速核心，全局只写一次，全异常兜底防线程卡死"""
     start = time.perf_counter()
     if is_black_url(url, url_black):
         return (time.perf_counter() - start, False, True)
@@ -267,7 +254,6 @@ def test_single_link(url: str, url_black: list):
         if 200 <= resp.status_code < 400:
             ok = True
     except Exception:
-        # 捕获所有网络、解析、连接异常，直接返回失败，不阻塞线程
         pass
     latency = time.perf_counter() - start
     return (latency, ok, False)
@@ -282,14 +268,12 @@ def generate_m3u_tvbox(final_channel_data):
             if group not in tvbox_group:
                 tvbox_group[group] = []
             tvbox_group[group].append(f"{disp_name},{url}")
-    # 生成TVBOX格式
     tvbox_lines = []
     for g, chs in tvbox_group.items():
         tvbox_lines.append(f"{g},#genre#")
         tvbox_lines.extend(chs)
     m3u_text = "\n".join(m3u_lines)
     tvbox_text = "\n".join(tvbox_lines)
-    # 一次性写入文件
     with open(OUTPUT_TXT, "w", encoding="utf-8") as f:
         f.write(m3u_text)
     with open(TV_BOX_OUTPUT, "w", encoding="utf-8") as wf:
@@ -297,20 +281,17 @@ def generate_m3u_tvbox(final_channel_data):
     print_log(f"【输出完成】M3U:{OUTPUT_TXT} TVBOX:{TV_BOX_OUTPUT}")
     return m3u_text, tvbox_text
 
-# ====================== 主流程（线性化，无反复循环） ======================
+# ====================== 主流程 ======================
 def main():
     print_log("========== IPTV分拣程序启动 ==========")
-    # 1. 加载基础配置（黑白名单、存量、模板、别名）
     exact_black_ch, fuzzy_kw, url_black_list = load_black_list()
     stock_channel_map, all_stock_ch_set, stock_filter_black = load_stock_channels(url_black_list)
     template_ch_list, template_ch_info, template_ch_set = load_template()
     alias_map = load_alias()
 
-    # 2. 计算需要测速的频道列表
     need_test_channel = build_need_test_list(stock_channel_map, template_ch_set, all_stock_ch_set)
     allow_set = set(need_test_channel)
 
-    # 3. 拉取所有订阅源，合并所有URL（只做一次全局去重）
     source_file_list = []
     if os.path.exists(SOURCES_FILE):
         with open(SOURCES_FILE, "r", encoding="utf-8") as f:
@@ -329,15 +310,11 @@ def main():
             real_ch = alias_map.get(ch, ch)
             raw_all_channel_link[real_ch].extend(link_list)
 
-    # 4. 频道预处理：黑名单剔除 + URL全局去重 + 前置过滤垃圾域名
     test_task_list = []
     seen_global_url = set()
     drop_black_ch = 0
     for ch_name, link_list in raw_all_channel_link.items():
-        # 频道黑名单过滤
-        ch_black_flag = False
-        if ch_name in exact_black_ch:
-            ch_black_flag = True
+        ch_black_flag = ch_name in exact_black_ch
         for kw in fuzzy_kw:
             if kw in ch_name:
                 ch_black_flag = True
@@ -346,10 +323,8 @@ def main():
             print_log(f"【频道黑名单剔除】{ch_name}")
             drop_black_ch += 1
             continue
-        # 仅保留需要测速的频道
         if ch_name not in allow_set:
             continue
-        # URL全局去重 + 前置过滤垃圾域名，不送入测速队列
         unique_links = list(dict.fromkeys(link_list))
         for u in unique_links:
             if is_black_url(u, url_black_list):
@@ -361,40 +336,32 @@ def main():
     total_task_num = len(test_task_list)
     print_log(f"【频道预处理结束】黑名单丢弃{drop_black_ch}个，待测速独立URL总数：{total_task_num}")
 
-    # 5. 分批测速（三层隔离防卡死，超时链接全部丢弃不重试）
-    test_result, retry_pool, finish_cnt = batch_run_tasks(
+    # 执行测速，无重试逻辑
+    test_result, _, finish_cnt = batch_run_tasks(
         task_list=test_task_list,
         task_func=test_single_link,
         url_black=url_black_list,
         batch_size=BATCH_SIZE,
-        batch_timeout=BATCH_TIMEOUT,
+        batch_max_cost=BATCH_MAX_COST,
         workers=STREAM_WORKERS,
         total_all=total_task_num
     )
-    print_log("\n【常规分批测速完成】")
-
-    # 本版核心优化：批次超时链接全部丢弃，不再执行重试逻辑，彻底杜绝连环超时卡死
+    print_log("\n【全部测速执行完成】超时链接直接丢弃，无重试环节")
     valid_channel_cnt = sum(1 for _, link_list in test_result.items() if any(ok for _, _, ok in link_list))
-    print_log("\n【全部测速执行完成】超时坏链接已全部丢弃，无重试环节")
 
-    # 7. 合并存量+测速新链接，封顶MAX_CHANNEL_LINK条
     final_channel_out = {}
     for ch_name in template_ch_list:
         disp_name, group = template_ch_info[ch_name]
         stock_links = stock_channel_map.get(ch_name, [])
         stock_url_set = set(u for _, u, _ in stock_links)
         if ch_name not in need_test_channel:
-            # 存量充足，直接复用存量
             merge_links = stock_links
         else:
-            # 合并优质测速链接 + 存量链接，去重
             new_raw = test_result.get(ch_name, [])
             good_new = []
             fallback_new = []
             for lat, u, ok in new_raw:
-                if not ok:
-                    continue
-                if u in stock_url_set:
+                if not ok or u in stock_url_set:
                     continue
                 if lat <= LATENCY_THRESHOLD:
                     good_new.append((lat, u, ok))
@@ -403,7 +370,6 @@ def main():
             good_new.sort(key=lambda x: x[0])
             fallback_new.sort(key=lambda x: x[0])
             merge_links = good_new + fallback_new + stock_links
-        # 全局去重封顶
         final_unique = []
         exist_u = set()
         for item in merge_links:
@@ -417,10 +383,8 @@ def main():
         final_channel_out[ch_name] = (disp_name, group, final_out)
         print_log(f"【频道合并完成】[{disp_name}] 留存线路{len(final_out)}条（存量{len(stock_links)}）")
 
-    # 8. 输出M3U与TVBOX文件
     generate_m3u_tvbox(final_channel_out)
 
-    # 9. 全局统计输出
     print_log("\n===================== 订阅源链路统计总表 =====================")
     for src, stat in source_stat.items():
         print_log(f"\n源地址：{src}")
