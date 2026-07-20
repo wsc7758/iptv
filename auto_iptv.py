@@ -3,6 +3,7 @@ import re
 import sys
 import time
 import traceback
+import gc
 from collections import defaultdict, OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 import warnings
@@ -25,13 +26,13 @@ STREAM_REQ_TIMEOUT = 1.5
 STREAM_WORKERS = 2
 MIN_STOCK_LINK = 4
 BATCH_SIZE = 4
-BATCH_MAX_COST = 18  # 单批总耗时上限，不再作为as_completed超时
+BATCH_MAX_COST = 18
 RETRY_BATCH_SIZE = 2
 RETRY_BATCH_TIMEOUT = 20
 MAX_RETRY_POOL = 200
 LATENCY_THRESHOLD = 1.2
 MAX_CHANNEL_LINK = 8
-BAD_DOMAIN = {"bfgd", "txiptv", "3000", "tvtv", "live4k"}
+BAD_DOMAIN = {"bfgd", "3000", "txiptv", "tvtv", "live4k"}
 
 # 环境初始化
 warnings.filterwarnings("ignore")
@@ -54,10 +55,6 @@ def is_black_url(url: str, black_list: list) -> bool:
     return False
 
 def batch_run_tasks(task_list, task_func, url_black, batch_size, batch_max_cost, workers, total_all):
-    """
-    全新无阻塞批次执行器：彻底移除as_completed批量timeout，不遍历未完成future
-    逻辑：逐条接收完成任务，计时超标直接终止本批，丢弃所有剩余任务，零阻塞收集
-    """
     finish_count = 0
     task_result = defaultdict(list)
     total = len(task_list)
@@ -72,23 +69,15 @@ def batch_run_tasks(task_list, task_func, url_black, batch_size, batch_max_cost,
         task_store = {pool.submit(task_func, link, url_black): (ch, link) for ch, link in batch}
         completed = set()
 
-        # 循环接收已完成任务，不设置整批超时，靠单条请求快速失败
         while len(completed) < len(task_store):
-            # 每轮只等0.3s，持续刷新日志，无长时间阻塞
-            try:
-                fut = next((f for f in task_store if f.done() and f not in completed), None)
-                if fut is None:
-                    time.sleep(0.3)
-                    # 检测本批总耗时是否超限
-                    if time.perf_counter() - batch_start_time > batch_max_cost:
-                        print_log(f"⚠️ 第{batch_idx}批总耗时超过{batch_max_cost}s上限，直接丢弃所有未完成链接，跳过残留任务")
-                        break
-                    continue
-            except StopIteration:
+            fut = next((f for f in task_store if f.done() and f not in completed), None)
+            if fut is None:
                 time.sleep(0.3)
+                if time.perf_counter() - batch_start_time > batch_max_cost:
+                    print_log(f"⚠️ 第{batch_idx}批总耗时超过{batch_max_cost}s上限，直接丢弃所有未完成链接，跳过残留任务")
+                    break
                 continue
 
-            # 处理已完成任务
             completed.add(fut)
             ch_name, url = task_store[fut]
             try:
@@ -104,7 +93,6 @@ def batch_run_tasks(task_list, task_func, url_black, batch_size, batch_max_cost,
                 continue
             task_result[ch_name].append((latency, url, link_ok))
 
-        # 直接销毁线程池，完全不遍历未完成future，无任何阻塞判断
         pool.shutdown(wait=False, cancel_futures=True)
     return task_result, [], finish_count
 
@@ -336,7 +324,6 @@ def main():
     total_task_num = len(test_task_list)
     print_log(f"【频道预处理结束】黑名单丢弃{drop_black_ch}个，待测速独立URL总数：{total_task_num}")
 
-    # 执行测速，无重试逻辑
     test_result, _, finish_cnt = batch_run_tasks(
         task_list=test_task_list,
         task_func=test_single_link,
@@ -398,6 +385,12 @@ def main():
     print_log(f"临时测速频道清单：{LOW_LINK_CHANNEL_FILE}")
     print_log(f"存量阶段过滤广告链接：{stock_filter_black}")
     print_log("==== IPTV分拣程序全部执行完毕 ====")
+
+    # ==================== 新增资源强制回收代码，解决后续git/网络阻塞 ====================
+    from requests import Session
+    Session().close_all()
+    gc.collect()
+    print_log("【资源回收完成】全部网络socket、文件句柄已释放")
 
 if __name__ == "__main__":
     try:
