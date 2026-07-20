@@ -12,14 +12,13 @@ BASE_PATH = "config/"
 BLACKLIST_FILE = os.path.join(BASE_PATH, "blacklist.txt")
 # 输入：主脚本生成的iptv.txt（只读，全程不修改此文件）
 INPUT_IPTV_FILE = "iptv.txt"
-# 二次筛选独立输出文件，和原iptv.txt完全隔离互不影响
+# 仅输出这一个文件
 OUTPUT_FILE = "iptv1.txt"
-TV_BOX_OUTPUT = "tv.txt"
 
 # 今日分片GET测速参数（和老脚本HEAD测速区分开）
 STREAM_REQ_TIMEOUT = 2.0
 STREAM_EVAL_WORKERS = 2
-MAX_LINK_PER_CHANNEL = 5  # 单个频道最多保留5条最优链路
+MAX_LINK_PER_CHANNEL = 3  # 单个频道最多保留3条最优链路
 LATENCY_THRESHOLD = 2.5
 HTTP_RANGE_HEADERS = {"Range": "bytes=0-1023"}
 
@@ -158,33 +157,6 @@ def parse_keep_origin_order(input_text: str):
         channel_link_map[key].extend(temp_url_buffer)
     return channel_link_map, channel_origin_order, url_raw_line_map
 
-# M3U转DIYP tv.txt格式
-def m3u_to_tvbox_txt(m3u_lines: list):
-    group_data = OrderedDict()
-    curr_group = "默认分组"
-    curr_ch = ""
-    for line in m3u_lines:
-        l = line.strip()
-        if not l:
-            continue
-        if l.startswith("#EXTINF"):
-            g_match = REGEX_GROUP_TITLE.search(l)
-            if g_match:
-                curr_group = g_match.group(1)
-            if "," in l:
-                curr_ch = l.split(",")[-1].strip()
-                if REGEX_CCTV_PREFIX.match(curr_ch):
-                    curr_ch = curr_ch.replace("-", "－", 1)
-        elif l.startswith("http"):
-            if curr_group not in group_data:
-                group_data[curr_group] = []
-            group_data[curr_group].append(f"{curr_ch},{l}")
-    out_lines = []
-    for gname, ch_lines in group_data.items():
-        out_lines.append(f"{gname},#genre#")
-        out_lines.extend(ch_lines)
-    return "\n".join(out_lines)
-
 def main():
     print("========== 后置二次优化测速程序 启动 ==========")
     print(f"依赖前置脚本输出只读文件: {INPUT_IPTV_FILE}，全程不会修改该文件")
@@ -268,21 +240,15 @@ def main():
         for u in keep_urls:
             output_m3u_lines.append(url_raw_line_map[u])
 
-    # 独立输出新文件 iptv1.txt，完全不触碰原iptv.txt
+    # 独立输出唯一文件 iptv1.txt，不再生成tv.txt
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write("\n".join(output_m3u_lines))
     print(f"\n【二次优化成品已输出至：{OUTPUT_FILE}】严格沿用iptv.txt原始分组、频道顺序，原iptv.txt无任何修改")
 
-    # 生成TVBOX专用tv.txt
-    tvbox_text = m3u_to_tvbox_txt(output_m3u_lines)
-    with open(TV_BOX_OUTPUT, "w", encoding="utf-8") as wf:
-        wf.write(tvbox_text)
-    print(f"【DIYP分组文件生成完成：{TV_BOX_OUTPUT}】")
-
     print(f"\n========== 后置优化程序执行汇总 ==========")
     print(f"测速后存在可用链路的频道总数：{valid_channel_total}")
     print(f"单频道最大保留最优链路数量：{MAX_LINK_PER_CHANNEL}")
-    print(f"运行逻辑：只读iptv.txt，独立输出iptv1.txt，两套程序互不干扰")
+    print(f"运行逻辑：只读iptv.txt，仅独立输出iptv1.txt，两套程序互不干扰")
     print("==== 后置优化程序全部执行完毕 ====")
 
 if __name__ == "__main__":
