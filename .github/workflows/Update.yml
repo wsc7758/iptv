@@ -33,7 +33,7 @@ jobs:
         run: pip install requests urllib3
 
       - name: 执行分拣脚本
-        # 去掉 shell: /usr/bin/bash -e {0} 这一行！
+        # 彻底移除 shell: bash -e 严格报错模式，|| true 正常生效
         run: python3 auto_iptv.py || true
         continue-on-error: true
         env:
@@ -68,6 +68,7 @@ jobs:
           git push --force-with-lease -v origin master || true
 
       # 打包 Pages 静态资源
+      # if: always() 无论前面步骤成功失败都执行打包
       - name: 打包 Pages 静态资源
         if: always()
         timeout-minutes: 8
