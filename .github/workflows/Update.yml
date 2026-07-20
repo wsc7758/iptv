@@ -29,7 +29,6 @@ jobs:
       - name: 安装Python依赖
         run: pip install requests urllib3
 
-      # 重点：整段没有 shell: xxx -e 配置！！
       - name: 执行分拣脚本
         run: python3 auto_iptv.py || true
         continue-on-error: true
