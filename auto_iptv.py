@@ -26,9 +26,10 @@ FALLBACK_MAX_LINK = 5
 LATENCY_THRESHOLD = 2.5       # 海外虚拟机放宽优质链路延迟标准
 HTTP_RANGE_HEADERS = {"Range": "bytes=0-1023"}  # 测速仅拉取1KB分片，节省带宽
 
-# 正则预编译（全局只编译1次，避免循环重复编译损耗性能）
+# 正则预编译【全部修正，统一compile预编译，无运行时重复构造】
 REGEX_CCTV_PREFIX = re.compile(r"^CCTV-\d+")
 REGEX_URL_SUFFIX_CLEAN = re.compile(r"\$.*$")
+REGEX_GROUP_TITLE = re.compile(r'group-title="([^"]+)"')
 # ======================================================================
 
 import warnings
@@ -59,6 +60,9 @@ def unique_list(raw_list: list) -> list:
 
 def append_bad_url_to_blacklist(bad_url_set: set):
     """批量将失效URL追加至黑名单，自动去重，格式url|auto_bad"""
+    # 修复：先确保config目录存在，避免写入时报目录不存在
+    if not os.path.exists(BASE_PATH):
+        os.makedirs(BASE_PATH)
     if not bad_url_set:
         print("【无新增失效链接，无需更新黑名单】")
         return
@@ -231,7 +235,8 @@ def m3u_to_tvbox_txt(m3u_content):
         if not l:
             continue
         if l.startswith("#EXTINF"):
-            g_match = re.search(r'group-title="([^"]+)"', l)
+            # 修复：使用预编译正则，不再每次重新search编译
+            g_match = REGEX_GROUP_TITLE.search(l)
             if g_match:
                 curr_group = g_match.group(1)
             if "," in l:
@@ -251,6 +256,11 @@ def m3u_to_tvbox_txt(m3u_content):
 
 def main():
     print("========== IPTV分拣程序开始运行 ==========")
+    # 前置容错：不存在config文件夹自动创建，防止配置文件读写报错
+    if not os.path.exists(BASE_PATH):
+        os.makedirs(BASE_PATH)
+        print(f"【自动创建配置目录】{BASE_PATH}")
+
     alias_map = load_alias()
     allow_set = load_allow_list()
     exact_black, fuzzy_keywords, url_black_list = load_blacklist()
@@ -302,7 +312,7 @@ def main():
             print(f"【频道二次去重】{std_name} 清除重复线路 {len(urllist) - len(unique_urls)} 条")
     print(f"【频道预处理结束】黑名单丢弃频道总数:{drop_black_channel_count}，进入测速频道总数:{len(std_channels)}")
 
-    # 测速任务提前合并去重，大幅减少线程池无效任务
+    # 测速任务前置全局去重，大幅减少线程池无效任务
     all_test_tasks_set = set()
     all_test_tasks = []
     for ch_name, urllist in std_channels.items():
