@@ -1,13 +1,10 @@
 import os
 import re
 import time
-import gc
-import sys
-import traceback
 from collections import defaultdict, OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# ====================== 全局配置区【常量统一集中】 ======================
+# ====================== 全局配置区 ======================
 BASE_PATH = "config/"
 SOURCES_FILE = os.path.join(BASE_PATH, "sources.txt")
 ALIAS_FILE = os.path.join(BASE_PATH, "alias.txt")
@@ -17,91 +14,51 @@ BLACKLIST_FILE = os.path.join(BASE_PATH, "blacklist.txt")
 OUTPUT_TXT = "iptv.txt"
 TV_BOX_OUTPUT = "tv.txt"
 
-# 测速参数【适配GitHub Actions海外弱网】
-STREAM_REQ_TIMEOUT = 2.0
-STREAM_EVAL_WORKERS = 2
+# 测速参数【统一常量】
+STREAM_REQ_TIMEOUT = 3.5
+STREAM_EVAL_WORKERS = 6   # 降低并发，防止容器网络拥堵
 MAX_LINK_PER_CHANNEL = 8
 FALLBACK_MAX_LINK = 5
-LATENCY_THRESHOLD = 2.5
-HTTP_RANGE_HEADERS = {"Range": "bytes=0-1023"}
-
-# 正则预编译
-REGEX_CCTV_PREFIX = re.compile(r"^CCTV-\d+")
-REGEX_URL_SUFFIX_CLEAN = re.compile(r"\$.*$")
-REGEX_GROUP_TITLE = re.compile(r'group-title="([^"]+)"')
-# ======================================================================
+LATENCY_THRESHOLD = 1.2
+# ======================================================
 
 import warnings
 warnings.filterwarnings("ignore")
 import requests
-requests.packages.urllib3.disable_warnings()
+requests.packages.urllib3.disable_warnings
 
-# ====================== 通用工具函数模块 ======================
+# ====================== URL清洗函数：直接返回去除后缀后的干净链接 ======================
 def clean_url_strip_suffix(raw_url: str) -> str:
+    """
+    彻底清除URL尾部 $ 开头的线路标记后缀，返回纯净播放地址
+    不再保留原始带后缀链接，全流程统一使用清洗后地址
+    """
     clean = raw_url.strip()
-    return REGEX_URL_SUFFIX_CLEAN.sub("", clean)
-
-def safe_read_file(file_path: str, encoding: str = "utf-8") -> str:
-    if not os.path.exists(file_path):
-        return ""
-    try:
-        with open(file_path, "r", encoding=encoding) as f:
-            return f.read()
-    except Exception as e:
-        print(f"【文件读取异常】{file_path}, err: {str(e)[:60]}")
-        return ""
-
-def unique_list(raw_list: list) -> list:
-    return list(dict.fromkeys(raw_list))
-
-def append_bad_url_to_blacklist(bad_url_set: set):
-    if not os.path.exists(BASE_PATH):
-        os.makedirs(BASE_PATH)
-    if not bad_url_set:
-        print("【无新增失效链接，无需更新黑名单】")
-        return
-    old_content = safe_read_file(BLACKLIST_FILE)
-    exist_urls = set()
-    for line in old_content.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        if line.startswith("url*"):
-            exist_urls.add(line[4:].strip())
-    new_bad_urls = [u for u in bad_url_set if u not in exist_urls]
-    if not new_bad_urls:
-        print("【所有失效链接已存在于黑名单，无需追加】")
-        return
-    write_lines = ["# 自动测速检测失效链接 url|auto_bad"]
-    write_lines.extend([f"url*{u}" for u in new_bad_urls])
-    try:
-        with open(BLACKLIST_FILE, "a", encoding="utf-8") as f:
-            f.write("\n" + "\n".join(write_lines) + "\n")
-        print(f"【自动黑名单写入完成】新增{len(new_bad_urls)}条完全失效播放链接")
-    except Exception as e:
-        # 关键修复：写入失败仅警告，不中断整个分拣流程
-        print(f"【警告：黑名单写入失败，本次不自动拉黑失效链接】err: {str(e)[:80]}")
+    # 匹配 $ 到行尾所有字符直接删除
+    clean = re.sub(r"\$.*$", "", clean)
+    return clean
 # ==================================================================
 
 def load_blacklist():
     exact_black = set()
     fuzzy_keywords = []
     url_black = []
-    file_content = safe_read_file(BLACKLIST_FILE)
-    for line in file_content.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        if line.startswith("url*"):
-            word = line[4:].strip()
-            if word:
-                url_black.append(word)
-        elif line.startswith("*"):
-            word = line[1:].strip()
-            if word:
-                fuzzy_keywords.append(word)
-        else:
-            exact_black.add(line)
+    if os.path.exists(BLACKLIST_FILE):
+        with open(BLACKLIST_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if line.startswith("url*"):
+                    word = line[4:].strip()
+                    if word:
+                        url_black.append(word)
+                elif line.startswith("*"):
+                    word = line[1:].strip()
+                    if word:
+                        fuzzy_keywords.append(word)
+                else:
+                    exact_black.add(line)
     print(f"【黑名单加载完成】精确频道黑名单:{len(exact_black)}条，模糊关键词:{len(fuzzy_keywords)}条，URL广告黑名单:{len(url_black)}条")
     return exact_black, fuzzy_keywords, url_black
 
@@ -114,7 +71,10 @@ def is_black_channel(channel_name, exact_black, fuzzy_keywords):
     return False
 
 def is_black_url(url, url_black_list):
-    return url in url_black_list
+    for kw in url_black_list:
+        if kw in url:
+            return True
+    return False
 
 def test_single_stream(url, url_black_list):
     start = time.perf_counter()
@@ -122,13 +82,7 @@ def test_single_stream(url, url_black_list):
         return (time.perf_counter() - start, url, False, True)
     ok = False
     try:
-        resp = requests.get(
-            url,
-            timeout=STREAM_REQ_TIMEOUT,
-            allow_redirects=True,
-            verify=False,
-            headers=HTTP_RANGE_HEADERS
-        )
+        resp = requests.head(url, timeout=STREAM_REQ_TIMEOUT, allow_redirects=True, verify=False)
         if 200 <= resp.status_code < 400:
             ok = True
     except Exception:
@@ -138,35 +92,38 @@ def test_single_stream(url, url_black_list):
 
 def load_alias():
     alias_map = {}
-    file_content = safe_read_file(ALIAS_FILE)
-    for line in file_content.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        parts = [p.strip() for p in line.split(",")]
-        std_name = parts[0]
-        for raw_name in parts:
-            alias_map[raw_name] = std_name
+    if os.path.exists(ALIAS_FILE):
+        with open(ALIAS_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts = [p.strip() for p in line.split(",")]
+                std_name = parts[0]
+                for raw_name in parts:
+                    alias_map[raw_name] = std_name
     print(f"【别名表加载完成】共载入 {len(alias_map)} 条别名映射")
     return alias_map
 
 def load_allow_list():
     allow_set = set()
-    file_content = safe_read_file(ALLOW_LIST_FILE)
-    for line in file_content.splitlines():
-        line = line.strip()
-        if line and not line.startswith("#"):
-            allow_set.add(line)
+    if os.path.exists(ALLOW_LIST_FILE):
+        with open(ALLOW_LIST_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    allow_set.add(line)
     print(f"【白名单加载完成】允许频道总数: {len(allow_set)}")
     return allow_set
 
 def fetch_source_urls():
     url_list = []
-    file_content = safe_read_file(SOURCES_FILE)
-    for line in file_content.splitlines():
-        u = line.strip()
-        if u and not u.startswith("#"):
-            url_list.append(u)
+    if os.path.exists(SOURCES_FILE):
+        with open(SOURCES_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                u = line.strip()
+                if u and not u.startswith("#"):
+                    url_list.append(u)
     print(f"【源列表读取完成】待拉取源总数：{len(url_list)}")
     return url_list
 
@@ -191,6 +148,7 @@ def parse_m3u(content):
         elif line.startswith("http"):
             link = line.strip()
             if name:
+                # 解析阶段直接清洗，只存入无后缀干净链接，原始带后缀直接丢弃
                 clean_link = clean_url_strip_suffix(link)
                 result[name].append(clean_link)
     return result
@@ -210,10 +168,12 @@ def parse_txt(content):
             ch_name = ch_name.strip()
             url = url.strip()
             if url.startswith("http"):
+                # TXT源同样解析时直接清洗
                 clean_link = clean_url_strip_suffix(url)
                 result[ch_name].append(clean_link)
     return result
 
+# M3U转DIYP标准txt格式工具函数
 def m3u_to_tvbox_txt(m3u_content):
     group_data = OrderedDict()
     curr_group = "默认分组"
@@ -223,18 +183,23 @@ def m3u_to_tvbox_txt(m3u_content):
         if not l:
             continue
         if l.startswith("#EXTINF"):
-            g_match = REGEX_GROUP_TITLE.search(l)
+            # 提取分组名称
+            g_match = re.search(r'group-title="([^"]+)"', l)
             if g_match:
                 curr_group = g_match.group(1)
+            # 提取频道名称
             if "," in l:
                 curr_ch = l.split(",")[-1].strip()
-                if REGEX_CCTV_PREFIX.match(curr_ch):
+                # 匹配所有CCTV-数字开头频道，半角-替换成全角－
+                if re.match(r"^CCTV-\d+", curr_ch):
                     curr_ch = curr_ch.replace("-", "－", 1)
         elif l.startswith("http"):
+            # 此处链接已经全局清洗过，双重保险再清一次
             clean_url = clean_url_strip_suffix(l).strip()
             if curr_group not in group_data:
                 group_data[curr_group] = []
             group_data[curr_group].append(f"{curr_ch},{clean_url}")
+    # 组装输出文本
     out_lines = []
     for gname, ch_lines in group_data.items():
         out_lines.append(f"{gname},#genre#")
@@ -243,20 +208,19 @@ def m3u_to_tvbox_txt(m3u_content):
 
 def main():
     print("========== IPTV分拣程序开始运行 ==========")
-    if not os.path.exists(BASE_PATH):
-        os.makedirs(BASE_PATH)
-        print(f"【自动创建配置目录】{BASE_PATH}")
-
     alias_map = load_alias()
     allow_set = load_allow_list()
     exact_black, fuzzy_keywords, url_black_list = load_blacklist()
     source_urls = fetch_source_urls()
 
+    # ====================== 源维度统计容器 ======================
+    # key: 源url, value: {total:总线路, good:优质达标线路, fallback:兜底线路, black:广告过滤线路}
     source_statistics = defaultdict(lambda: {"total": 0, "good": 0, "fallback": 0, "black": 0})
+    # 修复：一条URL可能属于多个源，使用列表存储全部归属源
     url_belong_source = defaultdict(list)
-    raw_all_channels = defaultdict(list)
-    auto_bad_url_set = set()
+    # ==================================================================
 
+    raw_all_channels = defaultdict(list)
     for idx, src in enumerate(source_urls, start=1):
         print(f"\n【{idx}/{len(source_urls)}】正在拉取源: {src}")
         txt = download_text(src)
@@ -264,19 +228,26 @@ def main():
             print(f"【跳过】该源无返回内容")
             source_statistics[src]["total"] = 0
             continue
-        data = parse_m3u(txt) if "#EXTM3U" in txt else parse_txt(txt)
+        if "#EXTM3U" in txt:
+            data = parse_m3u(txt)
+        else:
+            data = parse_txt(txt)
+        # 统计当前源原始总线路数量
         src_total = sum(len(v) for v in data.values())
         source_statistics[src]["total"] = src_total
         print(f"【源解析完成】该源解析出频道数量：{len(data)}，原始线路总数：{src_total}")
         for ch, urls in data.items():
             for u in urls:
+                # 绑定这条干净url归属当前src，支持多源重复URL
                 url_belong_source[u].append(src)
             raw_all_channels[ch].extend(urls)
     print(f"\n【全部源拉取完毕】清洗后原始频道总数：{len(raw_all_channels)}")
 
+    # 对干净URL做普通去重
     dedup_raw_channels = defaultdict(list)
     for ch_name, url_list in raw_all_channels.items():
-        dedup_raw_channels[ch_name] = unique_list(url_list)
+        unique_urls = list(dict.fromkeys(url_list))
+        dedup_raw_channels[ch_name] = unique_urls
     print(f"【一级去重完成】待处理频道总数：{len(dedup_raw_channels)}")
 
     std_channels = defaultdict(list)
@@ -289,44 +260,49 @@ def main():
             continue
         if allow_set and std_name not in allow_set:
             continue
-        unique_urls = unique_list(urllist)
-        std_channels[std_name] = unique_urls
-        if len(urllist) > len(unique_urls):
-            print(f"【频道二次去重】{std_name} 清除重复线路 {len(urllist) - len(unique_urls)} 条")
+        std_channels[std_name].extend(urllist)
+        all_urls = std_channels[std_name]
+        # 干净链接二次兜底去重
+        final_unique = list(dict.fromkeys(all_urls))
+        before = len(all_urls)
+        after = len(final_unique)
+        std_channels[std_name] = final_unique
+        if before > after:
+            print(f"【频道二次去重】{std_name} 清除重复线路 {before - after} 条")
     print(f"【频道预处理结束】黑名单丢弃频道总数:{drop_black_channel_count}，进入测速频道总数:{len(std_channels)}")
 
-    all_test_tasks_set = set()
+    channel_all_test_result = defaultdict(list)
     all_test_tasks = []
     for ch_name, urllist in std_channels.items():
         for link in urllist:
-            task_key = (ch_name, link)
-            if task_key not in all_test_tasks_set:
-                all_test_tasks_set.add(task_key)
-                all_test_tasks.append(task_key)
-    del all_test_tasks_set
+            all_test_tasks.append((ch_name, link))
 
     total_task_num = len(all_test_tasks)
     print(f"\n【开始批量测速】总待检测链接数量：{total_task_num}")
     finished = 0
-    channel_all_test_result = defaultdict(list)
-
     with ThreadPoolExecutor(max_workers=STREAM_EVAL_WORKERS) as pool:
-        futures_map = {pool.submit(test_single_stream, link, url_black_list): (ch, link) for ch, link in all_test_tasks}
+        futures_map = {}
+        for ch, link in all_test_tasks:
+            f = pool.submit(test_single_stream, link, url_black_list)
+            futures_map[f] = (ch, link)
         for future in as_completed(futures_map):
             ch_name, url = futures_map[future]
             latency, url, ok, hit_url_black = future.result()
             finished += 1
             if hit_url_black or finished % 20 == 0:
                 print(f"【测速进度 {finished}/{total_task_num}】已完成链接测速")
+            # 命中URL黑名单，归属源全部black计数+1
             if hit_url_black:
                 print(f"  >> 【URL黑名单剔除广告链接】{url}")
-                for s in url_belong_source.get(url, []):
+                belong_src_list = url_belong_source.get(url, [])
+                for s in belong_src_list:
                     source_statistics[s]["black"] += 1
                 continue
             channel_all_test_result[ch_name].append((latency, url, ok))
-            if not ok:
-                auto_bad_url_set.add(url)
-            for belong_src in url_belong_source.get(url, []):
+
+            # 反向匹配归属源，累加优质/兜底统计，多源同URL全部计数
+            belong_src_list = url_belong_source.get(url, [])
+            for belong_src in belong_src_list:
                 if ok:
                     if latency <= LATENCY_THRESHOLD:
                         source_statistics[belong_src]["good"] += 1
@@ -334,30 +310,33 @@ def main():
                         source_statistics[belong_src]["fallback"] += 1
     print("【全部测速任务执行完毕】\n")
 
-    append_bad_url_to_blacklist(auto_bad_url_set)
-
+    lines = ["#EXTM3U x-tvg-url=\"epg.xml.gz\""]
     template_queue = []
     channel_info = {}
-    template_content = safe_read_file(TEMPLATE_OUTPUT_FILE)
-    for line in template_content.splitlines():
-        raw_line = line.strip()
-        if not raw_line or "#genre#" in raw_line:
-            continue
-        parts = raw_line.split("|")
-        if len(parts) >= 3:
-            std_name, display_name, group_name = parts[0].strip(), parts[1].strip(), parts[2].strip()
-        elif len(parts) == 2:
-            std_name, display_name = parts[0].strip(), parts[1].strip()
-            group_name = "默认分组"
-        else:
-            std_name = display_name = raw_line.strip()
-            group_name = "默认分组"
-        template_queue.append(std_name)
-        channel_info[std_name] = (display_name, group_name)
+    if os.path.exists(TEMPLATE_OUTPUT_FILE):
+        with open(TEMPLATE_OUTPUT_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                raw_line = line.strip()
+                if not raw_line or "#genre#" in raw_line:
+                    continue
+                parts = raw_line.split("|")
+                if len(parts) >= 3:
+                    std_name = parts[0].strip()
+                    display_name = parts[1].strip()
+                    group_name = parts[2].strip()
+                elif len(parts) == 2:
+                    std_name = parts[0].strip()
+                    display_name = parts[1].strip()
+                    group_name = "默认分组"
+                else:
+                    std_name = raw_line.strip()
+                    display_name = raw_line.strip()
+                    group_name = "默认分组"
+                template_queue.append(std_name)
+                channel_info[std_name] = (display_name, group_name)
     print(f"【模板读取完成】模板内待输出频道总数：{len(template_queue)}")
 
     matched_count = 0
-    output_m3u_lines = ["#EXTM3U x-tvg-url=\"epg.xml.gz\""]
     for std_name in template_queue:
         test_results = channel_all_test_result.get(std_name, [])
         if not test_results:
@@ -370,6 +349,8 @@ def main():
                     valid_items.append((latency, url))
                 else:
                     invalid_items.append((latency, url))
+            else:
+                invalid_items.append((latency, url))
 
         show_name, group = channel_info[std_name]
         if valid_items:
@@ -377,27 +358,35 @@ def main():
             output_links = [item[1] for item in valid_items[:MAX_LINK_PER_CHANNEL]]
             print(f"【正常输出】频道[{show_name}] 优质链接{len(output_links)}条")
             for link in output_links:
-                output_m3u_lines.append(f'#EXTINF:-1 group-title="{group}",{show_name}')
-                output_m3u_lines.append(link)
+                lines.append(f'#EXTINF:-1 group-title="{group}",{show_name}')
+                lines.append(link)
             matched_count += 1
-        elif invalid_items:
+        else:
+            if not invalid_items:
+                continue
             invalid_items.sort(key=lambda x: x[0])
-            unique_fallback = unique_list([u for _, u in invalid_items])
+            unique_fallback = list(dict.fromkeys([u for _, u in invalid_items]))
             output_links = unique_fallback[:FALLBACK_MAX_LINK]
             print(f"【降级兜底】频道[{show_name}] 仅保留备选链接{len(output_links)}条")
             for link in output_links:
-                output_m3u_lines.append(f'#EXTINF:-1 group-title="{group}",{show_name}')
-                output_m3u_lines.append(link)
+                lines.append(f'#EXTINF:-1 group-title="{group}",{show_name}')
+                lines.append(link)
 
+    # 写入M3U格式 iptv.txt（所有URL均无$后缀）
     with open(OUTPUT_TXT, "w", encoding="utf-8") as f:
-        f.write("\n".join(output_m3u_lines))
-    tvbox_text = m3u_to_tvbox_txt("\n".join(output_m3u_lines))
+        f.write("\n".join(lines))
+
+    # 转换生成DIYP专用 tv.txt
+    with open(OUTPUT_TXT, "r", encoding="utf-8") as rf:
+        m3u_full = rf.read()
+    tvbox_text = m3u_to_tvbox_txt(m3u_full)
     with open(TV_BOX_OUTPUT, "w", encoding="utf-8") as wf:
         wf.write(tvbox_text)
     print(f"\n【额外生成完成】DIYP专用订阅文件：{TV_BOX_OUTPUT}")
 
     valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, ok in items))
 
+    # ====================== 各订阅源链路检测统计报表 ======================
     print("\n===================== 各订阅源链路检测统计报表 =====================")
     for source_url, stat in source_statistics.items():
         print(f"\n【订阅源】{source_url}")
@@ -416,10 +405,4 @@ def main():
     print("==== IPTV分拣程序全部执行完毕 ====")
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print("脚本致命异常：")
-        print(traceback.format_exc())
-        # 弱化退出码，不触发bash -e中断
-        sys.exit(0)
+    main()
