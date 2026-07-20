@@ -19,13 +19,17 @@ TV_BOX_OUTPUT = "tv.txt"
 # 测速业务常量 适配GitHub Actions，保留GET分片测速
 STREAM_REQ_TIMEOUT = 1.5
 STREAM_RETRY_TIMES = 0     # 取消重试，减少重复请求耗时
-STREAM_EVAL_WORKERS = 6   # 极低并发，控制TCP连接数量
+STREAM_EVAL_WORKERS = 2    # 极低并发，控制TCP连接数量
 MAX_LINK_PER_CHANNEL = 8
 FALLBACK_MAX_LINK = 5
 LATENCY_THRESHOLD = 1.2
-MIN_STOCK_LINK = 5        # 存量>=5条直接跳过测速，大幅缩减测速总量
-BATCH_SIZE = 10            # 测速每批10条
-BATCH_GLOBAL_TIMEOUT = 12  # 单批整体最大运行时限，超时强制销毁线程池
+MIN_STOCK_LINK = 4         # 还原你原有逻辑：存量>=4条直接跳过测速
+BATCH_SIZE = 6             # 测速每批6条，降低单批拥堵
+BATCH_GLOBAL_TIMEOUT = 18  # 单批整体最大运行时限，适度放宽
+RETRY_BATCH_SIZE = 3       # 超时遗留链接重试批次大小
+RETRY_BATCH_TIMEOUT = 20   # 重试批次时限
+# 垃圾域名黑名单，提前过滤不进测速
+BAD_DOMAIN_LIST = {"bfgd", "txiptv", "3000", "tvtv", "live4k"}
 # ======================================================
 
 import warnings
@@ -158,6 +162,10 @@ def is_black_url(url, url_black_list):
 # ====================== 测速核心 保留GET分片逻辑，无全局Session ======================
 def test_single_stream(url, url_black_list):
     start = time.perf_counter()
+    # 前置垃圾域名过滤，直接跳过网络请求
+    for bad_d in BAD_DOMAIN_LIST:
+        if bad_d in url:
+            return (time.perf_counter() - start, url, False, True)
     if is_black_url(url, url_black_list):
         return (time.perf_counter() - start, url, False, True)
     ok = False
@@ -360,12 +368,20 @@ def main():
             print(f"【频道二次去重】{std_name} 清理重复 {before - after} 条", flush=True)
     print(f"【频道预处理结束】黑名单丢弃{drop_black_channel_count}个，进入测速频道：{len(std_channels)}", flush=True)
 
-    # ====================== 分批测速核心模块（每批10条、单批12秒超时、批销毁释放端口） ======================
+    # ====================== 分批测速核心模块（含超时任务重试逻辑） ======================
     channel_all_test_result = defaultdict(list)
     all_test_tasks = []
     seen_url = set()
+    # 组装任务时提前过滤垃圾域名，不进入测速队列
     for ch_name, urllist in std_channels.items():
         for link in urllist:
+            skip_flag = False
+            for bad_d in BAD_DOMAIN_LIST:
+                if bad_d in link:
+                    skip_flag = True
+                    break
+            if skip_flag:
+                continue
             if link not in seen_url:
                 seen_url.add(link)
                 all_test_tasks.append((ch_name, link))
@@ -373,8 +389,9 @@ def main():
     total_task_num = len(all_test_tasks)
     print(f"\n【启动分批测速】去重后待检测链接总数：{total_task_num}，每批{BATCH_SIZE}条，单批最大限时{BATCH_GLOBAL_TIMEOUT}秒", flush=True)
     finished = 0
+    timeout_remain_tasks = []  # 存储批次超时未完成的任务，后续重试
 
-    # 按批次切分循环执行
+    # 正常批次循环执行
     for batch_idx, batch_start in enumerate(range(0, total_task_num, BATCH_SIZE), start=1):
         batch_tasks = all_test_tasks[batch_start : batch_start + BATCH_SIZE]
         batch_end = min(batch_start + BATCH_SIZE, total_task_num)
@@ -418,8 +435,54 @@ def main():
                             else:
                                 source_statistics[belong_src]["fallback"] += 1
             except TimeoutError:
-                print(f"⚠️ 第{batch_idx}批测速超过{BATCH_GLOBAL_TIMEOUT}秒限时，强制终止本批，跳过剩余未完成链接", flush=True)
-    print("\n【全部分批测速任务执行完成】", flush=True)
+                print(f"⚠️ 第{batch_idx}批测速超过{BATCH_GLOBAL_TIMEOUT}秒限时，缓存剩余未完成链接，后续低负载重试", flush=True)
+                # 缓存未完成任务
+                for f, task in futures_map.items():
+                    if not f.done():
+                        timeout_remain_tasks.append(task)
+    print("\n【常规分批测速执行完成】", flush=True)
+
+    # 单独重试超时遗留链接
+    if len(timeout_remain_tasks) > 0:
+        print(f"\n========== 开始重试批次超时遗留链接，共{len(timeout_remain_tasks)}条 ==========", flush=True)
+        total_retry = len(timeout_remain_tasks)
+        for r_batch_start in range(0, total_retry, RETRY_BATCH_SIZE):
+            r_batch = timeout_remain_tasks[r_batch_start : r_batch_start + RETRY_BATCH_SIZE]
+            r_end = min(r_batch_start + RETRY_BATCH_SIZE, total_retry)
+            print(f"重试子批次：{r_batch_start+1} ~ {r_end} / {total_retry}", flush=True)
+            with ThreadPoolExecutor(max_workers=STREAM_EVAL_WORKERS) as pool:
+                retry_futures = {}
+                for ch, link in r_batch:
+                    f = pool.submit(test_single_stream, link, url_black_list)
+                    retry_futures[f] = (ch, link)
+                try:
+                    for f in as_completed(retry_futures, timeout=RETRY_BATCH_TIMEOUT):
+                        ch_name, url = retry_futures[f]
+                        try:
+                            latency, url, ok, hit_url_black = f.result(timeout=1)
+                        except Exception:
+                            latency = STREAM_REQ_TIMEOUT
+                            ok = False
+                            hit_url_black = False
+                        finished += 1
+                        if hit_url_black or finished % 50 == 0:
+                            print(f"【总测速进度 {finished}/{total_task_num}】", flush=True)
+                        if hit_url_black:
+                            belong_src_list = url_belong_source.get(url, [])
+                            for s in belong_src_list:
+                                source_statistics[s]["black"] += 1
+                            continue
+                        channel_all_test_result[ch_name].append((latency, url, ok))
+                        belong_src_list = url_belong_source.get(url, [])
+                        for belong_src in belong_src_list:
+                            if ok:
+                                if latency <= LATENCY_THRESHOLD:
+                                    source_statistics[belong_src]["good"] += 1
+                                else:
+                                    source_statistics[belong_src]["fallback"] += 1
+                except TimeoutError:
+                    print("⚠️ 本次重试子批次再次超时，永久丢弃该批链接", flush=True)
+    print("\n【全部测速任务（含重试）执行完成】", flush=True)
     # =============================================================================================
 
     # 读取频道展示模板，无模板自动兜底
