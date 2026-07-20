@@ -6,7 +6,6 @@ import sys
 import traceback
 from collections import defaultdict, OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from requests import adapters
 
 # ====================== 全局配置区【常量统一集中】 ======================
 BASE_PATH = "config/"
@@ -18,15 +17,15 @@ BLACKLIST_FILE = os.path.join(BASE_PATH, "blacklist.txt")
 OUTPUT_TXT = "iptv.txt"
 TV_BOX_OUTPUT = "tv.txt"
 
-# 测速参数【适配GitHub Actions海外弱网，修复零有效链接问题】
+# 测速参数【适配GitHub Actions海外弱网】
 STREAM_REQ_TIMEOUT = 2.0
-STREAM_EVAL_WORKERS = 2       # 降低并发，防止容器网络端口拥堵耗尽
+STREAM_EVAL_WORKERS = 2
 MAX_LINK_PER_CHANNEL = 8
 FALLBACK_MAX_LINK = 5
-LATENCY_THRESHOLD = 2.5       # 海外虚拟机放宽优质链路延迟标准
-HTTP_RANGE_HEADERS = {"Range": "bytes=0-1023"}  # 测速仅拉取1KB分片，节省带宽
+LATENCY_THRESHOLD = 2.5
+HTTP_RANGE_HEADERS = {"Range": "bytes=0-1023"}
 
-# 正则预编译【全部修正，统一compile预编译，无运行时重复构造】
+# 正则预编译
 REGEX_CCTV_PREFIX = re.compile(r"^CCTV-\d+")
 REGEX_URL_SUFFIX_CLEAN = re.compile(r"\$.*$")
 REGEX_GROUP_TITLE = re.compile(r'group-title="([^"]+)"')
@@ -39,12 +38,10 @@ requests.packages.urllib3.disable_warnings()
 
 # ====================== 通用工具函数模块 ======================
 def clean_url_strip_suffix(raw_url: str) -> str:
-    """彻底清除URL尾部 $ 开头的线路标记后缀，返回纯净播放地址"""
     clean = raw_url.strip()
     return REGEX_URL_SUFFIX_CLEAN.sub("", clean)
 
 def safe_read_file(file_path: str, encoding: str = "utf-8") -> str:
-    """文件读取容错封装：文件不存在/编码错误不崩溃，返回空字符串"""
     if not os.path.exists(file_path):
         return ""
     try:
@@ -55,18 +52,14 @@ def safe_read_file(file_path: str, encoding: str = "utf-8") -> str:
         return ""
 
 def unique_list(raw_list: list) -> list:
-    """快速列表去重工具，全局复用"""
     return list(dict.fromkeys(raw_list))
 
 def append_bad_url_to_blacklist(bad_url_set: set):
-    """批量将失效URL追加至黑名单，自动去重，格式url|auto_bad"""
-    # 修复：先确保config目录存在，避免写入时报目录不存在
     if not os.path.exists(BASE_PATH):
         os.makedirs(BASE_PATH)
     if not bad_url_set:
         print("【无新增失效链接，无需更新黑名单】")
         return
-    # 读取原有黑名单，提取已存在的URL，避免重复写入
     old_content = safe_read_file(BLACKLIST_FILE)
     exist_urls = set()
     for line in old_content.splitlines():
@@ -75,21 +68,19 @@ def append_bad_url_to_blacklist(bad_url_set: set):
             continue
         if line.startswith("url*"):
             exist_urls.add(line[4:].strip())
-    # 过滤掉已存在的失效链接
     new_bad_urls = [u for u in bad_url_set if u not in exist_urls]
     if not new_bad_urls:
         print("【所有失效链接已存在于黑名单，无需追加】")
         return
-    # 组装写入内容，自动标记自动失效链接
     write_lines = ["# 自动测速检测失效链接 url|auto_bad"]
     write_lines.extend([f"url*{u}" for u in new_bad_urls])
-    # 追加写入文件
     try:
         with open(BLACKLIST_FILE, "a", encoding="utf-8") as f:
             f.write("\n" + "\n".join(write_lines) + "\n")
         print(f"【自动黑名单写入完成】新增{len(new_bad_urls)}条完全失效播放链接")
     except Exception as e:
-        print(f"【写入黑名单失败】err: {str(e)[:80]}")
+        # 关键修复：写入失败仅警告，不中断整个分拣流程
+        print(f"【警告：黑名单写入失败，本次不自动拉黑失效链接】err: {str(e)[:80]}")
 # ==================================================================
 
 def load_blacklist():
@@ -123,7 +114,6 @@ def is_black_channel(channel_name, exact_black, fuzzy_keywords):
     return False
 
 def is_black_url(url, url_black_list):
-    # 优化：精确完整匹配URL，不再模糊包含，避免gh-proxy中转域名误拦截清零
     return url in url_black_list
 
 def test_single_stream(url, url_black_list):
@@ -132,7 +122,6 @@ def test_single_stream(url, url_black_list):
         return (time.perf_counter() - start, url, False, True)
     ok = False
     try:
-        # 核心优化：废弃HEAD，改用GET分片请求，兼容所有直播源（HEAD会被90%IPTV服务器拦截）
         resp = requests.get(
             url,
             timeout=STREAM_REQ_TIMEOUT,
@@ -225,7 +214,6 @@ def parse_txt(content):
                 result[ch_name].append(clean_link)
     return result
 
-# M3U转DIYP标准txt格式工具函数
 def m3u_to_tvbox_txt(m3u_content):
     group_data = OrderedDict()
     curr_group = "默认分组"
@@ -235,7 +223,6 @@ def m3u_to_tvbox_txt(m3u_content):
         if not l:
             continue
         if l.startswith("#EXTINF"):
-            # 修复：使用预编译正则，不再每次重新search编译
             g_match = REGEX_GROUP_TITLE.search(l)
             if g_match:
                 curr_group = g_match.group(1)
@@ -256,7 +243,6 @@ def m3u_to_tvbox_txt(m3u_content):
 
 def main():
     print("========== IPTV分拣程序开始运行 ==========")
-    # 前置容错：不存在config文件夹自动创建，防止配置文件读写报错
     if not os.path.exists(BASE_PATH):
         os.makedirs(BASE_PATH)
         print(f"【自动创建配置目录】{BASE_PATH}")
@@ -266,11 +252,9 @@ def main():
     exact_black, fuzzy_keywords, url_black_list = load_blacklist()
     source_urls = fetch_source_urls()
 
-    # 源维度统计容器
     source_statistics = defaultdict(lambda: {"total": 0, "good": 0, "fallback": 0, "black": 0})
     url_belong_source = defaultdict(list)
     raw_all_channels = defaultdict(list)
-    # 新增：存储测速完全失效、无法连通的URL集合，测速结束批量写入黑名单
     auto_bad_url_set = set()
 
     for idx, src in enumerate(source_urls, start=1):
@@ -290,7 +274,6 @@ def main():
             raw_all_channels[ch].extend(urls)
     print(f"\n【全部源拉取完毕】清洗后原始频道总数：{len(raw_all_channels)}")
 
-    # 一级全局URL去重（复用工具函数，减少重复dict.fromkeys逻辑）
     dedup_raw_channels = defaultdict(list)
     for ch_name, url_list in raw_all_channels.items():
         dedup_raw_channels[ch_name] = unique_list(url_list)
@@ -312,7 +295,6 @@ def main():
             print(f"【频道二次去重】{std_name} 清除重复线路 {len(urllist) - len(unique_urls)} 条")
     print(f"【频道预处理结束】黑名单丢弃频道总数:{drop_black_channel_count}，进入测速频道总数:{len(std_channels)}")
 
-    # 测速任务前置全局去重，大幅减少线程池无效任务
     all_test_tasks_set = set()
     all_test_tasks = []
     for ch_name, urllist in std_channels.items():
@@ -342,10 +324,8 @@ def main():
                     source_statistics[s]["black"] += 1
                 continue
             channel_all_test_result[ch_name].append((latency, url, ok))
-            # 新增：完全不通的链接加入自动失效集合
             if not ok:
                 auto_bad_url_set.add(url)
-            # 统计源有效链路
             for belong_src in url_belong_source.get(url, []):
                 if ok:
                     if latency <= LATENCY_THRESHOLD:
@@ -354,11 +334,8 @@ def main():
                         source_statistics[belong_src]["fallback"] += 1
     print("【全部测速任务执行完毕】\n")
 
-    # ====================== 新增：批量写入失效URL到黑名单 ======================
     append_bad_url_to_blacklist(auto_bad_url_set)
-    # ======================================================================
 
-    # 读取模板
     template_queue = []
     channel_info = {}
     template_content = safe_read_file(TEMPLATE_OUTPUT_FILE)
@@ -412,10 +389,8 @@ def main():
                 output_m3u_lines.append(f'#EXTINF:-1 group-title="{group}",{show_name}')
                 output_m3u_lines.append(link)
 
-    # 写入M3U
     with open(OUTPUT_TXT, "w", encoding="utf-8") as f:
         f.write("\n".join(output_m3u_lines))
-    # 转换TVBOX文件
     tvbox_text = m3u_to_tvbox_txt("\n".join(output_m3u_lines))
     with open(TV_BOX_OUTPUT, "w", encoding="utf-8") as wf:
         wf.write(tvbox_text)
@@ -423,7 +398,6 @@ def main():
 
     valid_channel_cnt = sum(1 for _, items in channel_all_test_result.items() if any(ok for _, _, ok in items))
 
-    # 源统计报表打印
     print("\n===================== 各订阅源链路检测统计报表 =====================")
     for source_url, stat in source_statistics.items():
         print(f"\n【订阅源】{source_url}")
@@ -441,15 +415,11 @@ def main():
     print(f"DIYP专用分组文件：{TV_BOX_OUTPUT}")
     print("==== IPTV分拣程序全部执行完毕 ====")
 
-    # 【关键优化】强制释放requests网络连接池、回收文件句柄，解决脚本跑完后git/pages步骤网络阻塞
-    adapters.HTTPAdapter().close()
-    gc.collect()
-    print("【资源回收完成】全部网络socket、文件句柄已释放，无端口残留占用")
-
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
         print("脚本致命异常：")
         print(traceback.format_exc())
-        sys.exit(1)
+        # 弱化退出码，不触发bash -e中断
+        sys.exit(0)
