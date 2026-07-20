@@ -33,7 +33,12 @@ jobs:
         run: pip install requests urllib3
 
       - name: 执行分拣脚本
-        run: python3 auto_iptv.py
+        # 关键修改：|| true 兜底 + 允许步骤失败不中断Job
+        run: python3 auto_iptv.py || true
+        continue-on-error: true
+        env:
+          TZ: Asia/Shanghai
+          GIT_HTTP_POSTBUFFER: 524288000
 
       - name: 正常提交文件变更
         timeout-minutes: 10
@@ -64,7 +69,7 @@ jobs:
 
       # 打包 Pages 静态资源
       - name: 打包 Pages 静态资源
-        if: success()
+        if: always()
         timeout-minutes: 8
         uses: actions/upload-pages-artifact@v3
         with:
@@ -72,6 +77,6 @@ jobs:
 
       # 部署到 GitHub Pages
       - name: 部署到 GitHub Pages
-        if: success()
+        if: always()
         timeout-minutes: 10
         uses: actions/deploy-pages@v4
