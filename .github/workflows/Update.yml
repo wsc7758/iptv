@@ -1,4 +1,8 @@
 name: Auto IPTV Update
+# 防止同一仓库并发执行，双任务同时push冲突卡死
+concurrency:
+  group: auto-iptv-update
+  cancel-in-progress: false
 on:
   workflow_dispatch:
   schedule:
@@ -7,6 +11,8 @@ on:
     - cron: '0 12 * * *' # 中午12点
 env:
   TZ: Asia/Shanghai
+  # 增大git网络缓冲区，解决海外推送卡顿
+  GIT_HTTP_POSTBUFFER: 524288000
 
 jobs:
   Update:
@@ -14,13 +20,14 @@ jobs:
     timeout-minutes: 180  # 180分钟主动终止，避免占用资源
     permissions:
       contents: write
-      pages: write       # 新增：Pages部署权限
-      id-token: write    # 新增：Pages鉴权令牌权限
+      pages: write       # Pages部署权限
+      id-token: write    # Pages鉴权令牌权限
     steps:
-      - name: 拉取仓库代码
+      - name: 拉取完整仓库代码
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: master
 
       - name: 安装Python依赖
         run: pip install requests urllib3
@@ -29,33 +36,42 @@ jobs:
         run: python3 auto_iptv.py
 
       - name: 正常提交文件变更
+        timeout-minutes: 10
         run: |
           git config --local user.name Bot
           git config --local user.email bot@github.com
+          # 刷新文件索引，避免缓存导致检测不到修改
+          git update-index --refresh
           git add .
-          git commit -m "$(date '+%Y-%m-%d %H:%M:%S') 自动更新iptv" || true
-          git push -f origin master
+          # --allow-empty 无修改也能提交，|| true兜底不中断流程
+          git commit --allow-empty -m "$(date '+%Y-%m-%d %H:%M:%S') 自动更新iptv" || true
+          # 安全强制推送，仅本地与远程一致时才覆盖，防止多人提交冲突卡死
+          git push --force-with-lease -v origin master
 
       # 【仅每周日执行】清理全部Git历史，保留最新快照
       - name: 每周日精简提交历史
         if: github.event.schedule == '0 19 * * 0'
+        timeout-minutes: 15
         run: |
           git config --local user.name Bot
           git config --local user.email bot@github.com
           git checkout --orphan temp_snapshot
           git add .
-          git commit -m "每周快照清理 $(date '+%Y-%m-%d %H:%M:%S')"
+          git commit --allow-empty -m "每周快照清理 $(date '+%Y-%m-%d %H:%M:%S')"
           git branch -D master
           git branch -m master
-          git push -f origin master
+          git push --force-with-lease -v origin master || true
 
-      # ========== 新增：构建并部署 GitHub Pages ==========
+      # 打包 Pages 静态资源
       - name: 打包 Pages 静态资源
         if: success()
+        timeout-minutes: 8
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./
 
+      # 部署到 GitHub Pages
       - name: 部署到 GitHub Pages
         if: success()
+        timeout-minutes: 10
         uses: actions/deploy-pages@v4
