@@ -20,7 +20,7 @@ OLD_IPTV_FILE = "iptv.txt"
 OUTPUT_TXT = "iptv.txt"
 TV_BOX_OUTPUT = "tv.txt"
 
-# 测速参数（沿用你原有配置，无改动）
+# 测速参数（沿用原有配置，无改动）
 STREAM_CONNECT_TIMEOUT = 0.8
 STREAM_REQ_TIMEOUT = 1.5
 STREAM_WORKERS = 2
@@ -60,6 +60,7 @@ def is_black_url(url: str, black_list: list) -> bool:
 def batch_run_tasks(task_list, task_func, url_black, batch_size, batch_timeout, workers, total_all):
     """统一测速/重试执行器，一套逻辑复用，消除重复代码
     :param total_all: 总任务总数，解决跨函数变量作用域问题
+    【修复】超时无阻塞收集，限制单批最多留存2条超时链接
     """
     finish_count = 0
     task_result = defaultdict(list)
@@ -77,7 +78,7 @@ def batch_run_tasks(task_list, task_func, url_black, batch_size, batch_timeout, 
             for ch, link in batch:
                 f = pool.submit(task_func, link, url_black)
                 future_map[f] = ch
-                task_store[f] = (ch, link)  # 绑定完整任务，不再读取私有属性
+                task_store[f] = (ch, link)
             try:
                 for fut in as_completed(future_map, timeout=batch_timeout):
                     ch_name = future_map[fut]
@@ -95,16 +96,18 @@ def batch_run_tasks(task_list, task_func, url_black, batch_size, batch_timeout, 
                         continue
                     task_result[ch_name].append((latency, url, link_ok))
             except TimeoutError:
-                print_log(f"⚠️ 第{batch_idx}批超过限时，缓存未完成链接待重试")
-                # 安全读取未完成任务，不访问私有属性 _args
-                unfinished = []
-                for f in future_map:
-                    if not f.done():
-                        unfinished.append(task_store[f])
-                add_num = min(len(unfinished), MAX_RETRY_POOL - len(timeout_remain))
+                print_log(f"⚠️ 第{batch_idx}批超过限时，快速筛选未完成链接（无阻塞）")
+                # 列表推导式一次性筛选，消除长同步循环阻塞日志
+                unfinished = [task_store[f] for f in future_map if not f.done()]
+                # 单批最多仅保留2条超时链接进入重试池，其余直接丢弃
+                keep_num = min(len(unfinished), 2)
+                add_num = min(keep_num, MAX_RETRY_POOL - len(timeout_remain))
                 timeout_remain.extend(unfinished[:add_num])
-                if add_num < len(unfinished):
-                    print_log(f"⚠️ 重试池已满{MAX_RETRY_POOL}，丢弃{len(unfinished)-add_num}条链接")
+                drop_count = len(unfinished) - keep_num
+                if drop_count > 0:
+                    print_log(f"⚠️ 单批超时链接过多，直接丢弃{drop_count}条，仅保留{keep_num}条重试")
+                if add_num < keep_num:
+                    print_log(f"⚠️ 全局重试池已满{MAX_RETRY_POOL}，额外丢弃{keep_num - add_num}条链接")
     return task_result, timeout_remain, finish_count
 
 # ====================== 业务独立函数 ======================
@@ -241,7 +244,7 @@ def parse_m3u_or_txt(content: str):
     return ch_link_map
 
 def test_single_link(url: str, url_black: list):
-    """单条链接测速核心，全局只写一次"""
+    """单条链接测速核心，全局只写一次，全异常兜底防线程卡死"""
     start = time.perf_counter()
     if is_black_url(url, url_black):
         return (time.perf_counter() - start, False, True)
@@ -257,8 +260,10 @@ def test_single_link(url: str, url_black: list):
         if 200 <= resp.status_code < 400:
             ok = True
     except Exception:
+        # 捕获所有网络、解析、连接异常，直接返回失败，不阻塞线程
         pass
-    return (time.perf_counter() - start, ok, False)
+    latency = time.perf_counter() - start
+    return (latency, ok, False)
 
 def generate_m3u_tvbox(final_channel_data):
     m3u_lines = ["#EXTM3U x-tvg-url=\"epg.xml.gz\""]
