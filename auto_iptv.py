@@ -379,18 +379,19 @@ def main():
         print_log(f" 优质链路：{stat['good']} 兜底慢速：{stat['fallback']}")
         print_log(f" 有效合计：{stat['good'] + stat['fallback']}")
     print_log("==============================================================")
-    print_log(f"\n========== 全局执行汇总 ==========")
+    print_log("\n========== 全局执行汇总 ==========")
     print_log(f"测速存在有效线路频道总数：{valid_channel_cnt}")
     print_log(f"模板成功输出频道总数：{len(final_channel_out)}")
     print_log(f"临时测速频道清单：{LOW_LINK_CHANNEL_FILE}")
     print_log(f"存量阶段过滤广告链接：{stock_filter_black}")
     print_log("==== IPTV分拣程序全部执行完毕 ====")
 
-    # ==================== 新增资源强制回收代码，解决后续git/网络阻塞 ====================
-    from requests import Session
-    Session().close_all()
+    # 修复：标准requests连接池释放，无不存在的close_all方法
+    import gc
+    from requests import adapters
+    adapters.HTTPAdapter().close()
     gc.collect()
-    print_log("【资源回收完成】全部网络socket、文件句柄已释放")
+    print_log("【资源回收完成】网络连接池、文件句柄已全部释放")
 
 if __name__ == "__main__":
     try:
