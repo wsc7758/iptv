@@ -30,8 +30,7 @@ jobs:
         run: pip install requests urllib3
 
       - name: 执行分拣脚本
-        # 核心修复：bash -c 隔离环境，无视外层shell -e严格模式
-        run: bash -c "python3 auto_iptv.py || true"
+        run: python3 auto_iptv.py || true
         continue-on-error: true
         env:
           TZ: Asia/Shanghai
