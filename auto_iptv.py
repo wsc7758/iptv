@@ -1,6 +1,8 @@
 import os
 import re
 import time
+import sys
+import subprocess
 from collections import defaultdict, OrderedDict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -404,5 +406,22 @@ def main():
     print(f"DIYP专用分组文件：{TV_BOX_OUTPUT}")
     print("==== IPTV分拣程序全部执行完毕 ====")
 
+    # ===================== 新增逻辑：主程序完全结束，休眠5分钟启动二次筛选脚本 =====================
+    print("\n【主分拣程序全部执行完成，等待5分钟后自动启动二次精细测速筛选程序】")
+    print("倒计时开始：300秒")
+    time.sleep(300)  # 休眠5分钟=300秒
+    print("【5分钟等待结束，启动二次筛选脚本 filter_opt.py】")
+    # 调用子进程运行二次脚本，不干扰原有iptv.txt文件
+    try:
+        subprocess.run([sys.executable, "filter_opt.py"], check=False)
+        print("【二次筛选脚本执行完毕，生成iptv1.txt】")
+    except Exception as e:
+        print(f"【警告：启动二次脚本失败】{str(e)}")
+
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print("主分拣程序捕获全局致命异常：")
+        print(traceback.format_exc())
+        sys.exit(0)
