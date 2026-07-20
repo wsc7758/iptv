@@ -57,10 +57,17 @@ def is_black_url(url: str, black_list: list) -> bool:
             return True
     return False
 
+def _safe_collect_unfinished(future_map, task_store, result_list):
+    """独立子线程执行收集，不阻塞主线程日志"""
+    tmp = []
+    for f in future_map:
+        if not f.done():
+            tmp.append(task_store[f])
+    result_list.extend(tmp)
+
 def batch_run_tasks(task_list, task_func, url_black, batch_size, batch_timeout, workers, total_all):
-    """统一测速/重试执行器，一套逻辑复用，消除重复代码
-    :param total_all: 总任务总数，解决跨函数变量作用域问题
-    【修复】超时无阻塞收集，限制单批最多留存2条超时链接
+    """统一测速/重试执行器，三层隔离彻底解决超时卡死
+    核心改动：批次超时立刻关闭线程池，收集任务丢子线程，超时链接全部丢弃不重试
     """
     finish_count = 0
     task_result = defaultdict(list)
@@ -72,42 +79,42 @@ def batch_run_tasks(task_list, task_func, url_black, batch_size, batch_timeout, 
         end = min(start + batch_size, total)
         print_log(f"\n===== 第{batch_idx}批测速：{start+1} ~ {end} / {total_all} =====")
 
-        with ThreadPoolExecutor(max_workers=workers) as pool:
-            future_map = {}
-            task_store = {}
-            for ch, link in batch:
-                f = pool.submit(task_func, link, url_black)
-                future_map[f] = ch
-                task_store[f] = (ch, link)
-            try:
-                for fut in as_completed(future_map, timeout=batch_timeout):
-                    ch_name = future_map[fut]
-                    url = task_store[fut][1]
-                    try:
-                        latency, link_ok, hit_black = fut.result(timeout=1)
-                    except Exception:
-                        latency = STREAM_REQ_TIMEOUT
-                        link_ok = False
-                        hit_black = False
-                    finish_count += 1
-                    if hit_black or finish_count % 50 == 0:
-                        print_log(f"【总测速进度 {finish_count}/{total_all}】")
-                    if hit_black:
-                        continue
-                    task_result[ch_name].append((latency, url, link_ok))
-            except TimeoutError:
-                print_log(f"⚠️ 第{batch_idx}批超过限时，快速筛选未完成链接（无阻塞）")
-                # 列表推导式一次性筛选，消除长同步循环阻塞日志
-                unfinished = [task_store[f] for f in future_map if not f.done()]
-                # 单批最多仅保留2条超时链接进入重试池，其余直接丢弃
-                keep_num = min(len(unfinished), 2)
-                add_num = min(keep_num, MAX_RETRY_POOL - len(timeout_remain))
-                timeout_remain.extend(unfinished[:add_num])
-                drop_count = len(unfinished) - keep_num
-                if drop_count > 0:
-                    print_log(f"⚠️ 单批超时链接过多，直接丢弃{drop_count}条，仅保留{keep_num}条重试")
-                if add_num < keep_num:
-                    print_log(f"⚠️ 全局重试池已满{MAX_RETRY_POOL}，额外丢弃{keep_num - add_num}条链接")
+        pool = ThreadPoolExecutor(max_workers=workers)
+        future_map = {}
+        task_store = {}
+        for ch, link in batch:
+            f = pool.submit(task_func, link, url_black)
+            future_map[f] = ch
+            task_store[f] = (ch, link)
+        try:
+            for fut in as_completed(future_map, timeout=batch_timeout):
+                ch_name = future_map[fut]
+                url = task_store[fut][1]
+                try:
+                    latency, link_ok, hit_black = fut.result(timeout=1)
+                except Exception:
+                    latency = STREAM_REQ_TIMEOUT
+                    link_ok = False
+                    hit_black = False
+                finish_count += 1
+                if hit_black or finish_count % 50 == 0:
+                    print_log(f"【总测速进度 {finish_count}/{total_all}】")
+                if hit_black:
+                    continue
+                task_result[ch_name].append((latency, url, link_ok))
+        except TimeoutError:
+            print_log(f"⚠️ 第{batch_idx}批超过限时，立刻关闭线程池释放阻塞网络线程")
+            # 1. 强制关闭线程池，终止所有卡死网络请求
+            pool.shutdown(wait=False, cancel_futures=True)
+            # 2. 新开独立子线程收集未完成任务，主线程持续打印日志不阻塞
+            from threading import Thread
+            temp_unfinished = []
+            t = Thread(target=_safe_collect_unfinished, args=(future_map, task_store, temp_unfinished))
+            t.start()
+            t.join(timeout=1.0)
+            print_log(f"⚠️ 本批{len(temp_unfinished)}条超时链接全部直接丢弃，不加入重试池避免连环卡死")
+        # 正常批次无超时，安全关闭线程池
+        pool.shutdown(wait=True)
     return task_result, timeout_remain, finish_count
 
 # ====================== 业务独立函数 ======================
@@ -354,7 +361,7 @@ def main():
     total_task_num = len(test_task_list)
     print_log(f"【频道预处理结束】黑名单丢弃{drop_black_ch}个，待测速独立URL总数：{total_task_num}")
 
-    # 5. 分批测速（封装统一执行函数，无重复代码，传入总任务数解决作用域）
+    # 5. 分批测速（三层隔离防卡死，超时链接全部丢弃不重试）
     test_result, retry_pool, finish_cnt = batch_run_tasks(
         task_list=test_task_list,
         task_func=test_single_link,
@@ -366,23 +373,9 @@ def main():
     )
     print_log("\n【常规分批测速完成】")
 
-    # 6. 重试批次超时遗留链接（复用同一套执行函数）
+    # 本版核心优化：批次超时链接全部丢弃，不再执行重试逻辑，彻底杜绝连环超时卡死
     valid_channel_cnt = sum(1 for _, link_list in test_result.items() if any(ok for _, _, ok in link_list))
-    if len(retry_pool) > 0:
-        print_log(f"\n========== 重试超时链接，共{len(retry_pool)}条 ==========")
-        retry_result, _, _ = batch_run_tasks(
-            task_list=retry_pool,
-            task_func=test_single_link,
-            url_black=url_black_list,
-            batch_size=RETRY_BATCH_SIZE,
-            batch_timeout=RETRY_BATCH_TIMEOUT,
-            workers=STREAM_WORKERS,
-            total_all=total_task_num
-        )
-        # 合并重试结果
-        for ch, link_info in retry_result.items():
-            test_result[ch].extend(link_info)
-    print_log("\n【全部测速（含重试）执行完成】")
+    print_log("\n【全部测速执行完成】超时坏链接已全部丢弃，无重试环节")
 
     # 7. 合并存量+测速新链接，封顶MAX_CHANNEL_LINK条
     final_channel_out = {}
