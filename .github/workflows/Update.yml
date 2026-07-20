@@ -1,27 +1,24 @@
 name: Auto IPTV Update
-# 防止同一仓库并发执行，双任务同时push冲突卡死
 concurrency:
   group: auto-iptv-update
   cancel-in-progress: false
 on:
   workflow_dispatch:
   schedule:
-    # 北京时间 凌晨03:00、中午12:00 每日自动执行
-    - cron: '0 3 * * *'  # 凌晨3点
-    - cron: '0 12 * * *' # 中午12点
+    - cron: '0 3 * * *'
+    - cron: '0 12 * * *'
 env:
   TZ: Asia/Shanghai
-  # 增大git网络缓冲区，解决海外推送卡顿
   GIT_HTTP_POSTBUFFER: 524288000
 
 jobs:
   Update:
     runs-on: ubuntu-latest
-    timeout-minutes: 180  # 180分钟主动终止，避免占用资源
+    timeout-minutes: 180
     permissions:
       contents: write
-      pages: write       # Pages部署权限
-      id-token: write    # Pages鉴权令牌权限
+      pages: write
+      id-token: write
     steps:
       - name: 拉取完整仓库代码
         uses: actions/checkout@v4
@@ -32,8 +29,8 @@ jobs:
       - name: 安装Python依赖
         run: pip install requests urllib3
 
+      # 重点：整段没有 shell: xxx -e 配置！！
       - name: 执行分拣脚本
-        # 彻底移除 shell: bash -e 严格报错模式，|| true 正常生效
         run: python3 auto_iptv.py || true
         continue-on-error: true
         env:
@@ -45,15 +42,11 @@ jobs:
         run: |
           git config --local user.name Bot
           git config --local user.email bot@github.com
-          # 刷新文件索引，避免缓存导致检测不到修改
           git update-index --refresh
           git add .
-          # --allow-empty 无修改也能提交，|| true兜底不中断流程
           git commit --allow-empty -m "$(date '+%Y-%m-%d %H:%M:%S') 自动更新iptv" || true
-          # 安全强制推送，仅本地与远程一致时才覆盖，防止多人提交冲突卡死
           git push --force-with-lease -v origin master
 
-      # 【仅每周日执行】清理全部Git历史，保留最新快照
       - name: 每周日精简提交历史
         if: github.event.schedule == '0 19 * * 0'
         timeout-minutes: 15
@@ -67,8 +60,6 @@ jobs:
           git branch -m master
           git push --force-with-lease -v origin master || true
 
-      # 打包 Pages 静态资源
-      # if: always() 无论前面步骤成功失败都执行打包
       - name: 打包 Pages 静态资源
         if: always()
         timeout-minutes: 8
@@ -76,7 +67,6 @@ jobs:
         with:
           path: ./
 
-      # 部署到 GitHub Pages
       - name: 部署到 GitHub Pages
         if: always()
         timeout-minutes: 10
