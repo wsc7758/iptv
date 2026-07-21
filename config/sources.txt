@@ -18,3 +18,9 @@ http://210.245.166.84:1299/live/live.txt
 https://live.zbds.top/tv/iptv4.txt
 https://gh-proxy.com/https://raw.githubusercontent.com/kakaxi-1/IPTV/main/ipv4.txt
 https://develop202.github.io/migu_video/interface.txt
+http://iptv.ruyitv.cc/m3u/tv.txt
+https://fastgit.cc/https://raw.githubusercontent.com/develop202/migu_video/refs/heads/main/interface.txt
+https://fastgit.cc/https://raw.githubusercontent.com/iTCoffe/Collect-iTV/main/Internet_iTV.m3u
+https://ghproxy.net/https://raw.githubusercontent.com/hjdhnx/hipy-sniffer/refs/heads/main/static/lives/lives.txt
+https://szyyds.cn/tv/live/x.txt
+https://ghproxy.net/https://raw.githubusercontent.com/ssili126/tv/main/itvlist.txt
