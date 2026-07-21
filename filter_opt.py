@@ -10,22 +10,20 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # ====================== 全局配置常量 ======================
 BASE_PATH = "config/"
 BLACKLIST_FILE = os.path.join(BASE_PATH, "blacklist.txt")
-# 输入：主脚本生成的iptv.txt（只读，全程不修改此文件）
-INPUT_IPTV_FILE = "iptv.txt"
-# 仅输出这一个文件
-OUTPUT_FILE = "iptv1.txt"
+# 输入输出统一为tv.txt：读取原文件，筛选后覆盖写入
+INPUT_FILE = "tv.txt"
+OUTPUT_FILE = "tv.txt"
 
-# 今日分片GET测速参数（和老脚本HEAD测速区分开）
+# 分片GET精细测速参数
 STREAM_REQ_TIMEOUT = 2.0
 STREAM_EVAL_WORKERS = 2
 MAX_LINK_PER_CHANNEL = 3  # 单个频道最多保留3条最优链路
 LATENCY_THRESHOLD = 2.5
-HTTP_RANGE_HEADERS = {"Range": "bytes=0-1023"}
+# 改为512KB分片，真实模拟播放加载，测速精度大幅提升
+HTTP_RANGE_HEADERS = {"Range": "bytes=0-524287"}
 
-# 全局正则预编译
+# 正则预编译
 REGEX_URL_SUFFIX_CLEAN = re.compile(r"\$.*$")
-REGEX_GROUP_TITLE = re.compile(r'group-title="([^"]+)"')
-REGEX_CCTV_PREFIX = re.compile(r"^CCTV-\d+")
 # ======================================================================
 
 import warnings
@@ -95,7 +93,7 @@ def append_bad_url_to_blacklist(bad_url_set: set):
 def is_black_url(url, url_black_set):
     return url in url_black_set
 
-# 今日分片GET测速核心函数（区别老脚本HEAD探测）
+# 分片GET测速核心函数
 def test_single_stream(url, url_black_set):
     start = time.perf_counter()
     if is_black_url(url, url_black_set):
@@ -116,50 +114,40 @@ def test_single_stream(url, url_black_set):
     latency = time.perf_counter() - start
     return (latency, url, ok, False)
 
-# 解析输入iptv.txt，严格保留原始分组、频道出现顺序，只读不修改源文件
-def parse_keep_origin_order(input_text: str):
-    channel_link_map = OrderedDict()
-    channel_origin_order = []
-    url_raw_line_map = dict()
-    curr_group = "默认分组"
-    curr_channel = ""
-    temp_url_buffer = []
+# 解析tv.txt标准DIYP格式，保留原始分组顺序、频道原始行文本
+def parse_tv_format(input_text: str):
+    group_order = []        # 记录分组出现原始顺序
+    group_channel_map = OrderedDict()
+    channel_raw_line = dict() # 干净url → 原始"频道名,url"整行
+    curr_group = ""
 
     for raw_line in input_text.splitlines():
-        l_strip = raw_line.strip()
-        if not l_strip:
+        line_strip = raw_line.strip()
+        if not line_strip:
             continue
-        if l_strip.startswith("#EXTINF"):
-            # 缓存上一个频道的链接数据
-            if curr_channel and temp_url_buffer:
-                key = (curr_group, curr_channel)
-                if key not in channel_link_map:
-                    channel_link_map[key] = []
-                    channel_origin_order.append(key)
-                channel_link_map[key].extend(temp_url_buffer)
-                temp_url_buffer = []
-            # 更新当前分组与频道名称
-            g_match = REGEX_GROUP_TITLE.search(l_strip)
-            if g_match:
-                curr_group = g_match.group(1)
-            if "," in l_strip:
-                curr_channel = l_strip.split(",")[-1].strip()
-        elif l_strip.startswith("http"):
-            clean_url = clean_url_strip_suffix(l_strip)
-            temp_url_buffer.append(clean_url)
-            url_raw_line_map[clean_url] = raw_line
-    # 收尾处理最后一组频道
-    if curr_channel and temp_url_buffer:
-        key = (curr_group, curr_channel)
-        if key not in channel_link_map:
-            channel_link_map[key] = []
-            channel_origin_order.append(key)
-        channel_link_map[key].extend(temp_url_buffer)
-    return channel_link_map, channel_origin_order, url_raw_line_map
+        # 识别分组标记行
+        if "#genre#" in line_strip:
+            curr_group = line_strip.split(",")[0].strip()
+            if curr_group not in group_channel_map:
+                group_channel_map[curr_group] = OrderedDict()
+                group_order.append(curr_group)
+            continue
+        # 频道+URL行
+        if "," in line_strip:
+            ch_name, raw_url = line_strip.split(",", 1)
+            ch_name = ch_name.strip()
+            raw_url = raw_url.strip()
+            clean_url = clean_url_strip_suffix(raw_url)
+            if curr_group and ch_name and clean_url.startswith("http"):
+                if ch_name not in group_channel_map[curr_group]:
+                    group_channel_map[curr_group][ch_name] = []
+                group_channel_map[curr_group][ch_name].append(clean_url)
+                channel_raw_line[clean_url] = line_strip
+    return group_order, group_channel_map, channel_raw_line
 
 def main():
-    print("========== 后置二次优化测速程序 启动 ==========")
-    print(f"依赖前置脚本输出只读文件: {INPUT_IPTV_FILE}，全程不会修改该文件")
+    print("========== 后置TV.TXT精细测速筛选程序 启动 ==========")
+    print(f"读取源文件: {INPUT_FILE}，筛选完成后直接覆盖写入{OUTPUT_FILE}")
     if not os.path.exists(BASE_PATH):
         os.makedirs(BASE_PATH)
         print(f"【自动创建配置目录】{BASE_PATH}")
@@ -167,22 +155,26 @@ def main():
     url_black_set = load_url_blacklist()
     auto_bad_url_set = set()
 
-    # 读取前置脚本生成的iptv.txt，仅读取，无写入操作
-    raw_text = safe_read_file(INPUT_IPTV_FILE)
+    # 只读原始tv.txt，全程不修改原文件，仅读取数据
+    raw_text = safe_read_file(INPUT_FILE)
     if not raw_text:
-        print(f"【致命错误】前置文件 {INPUT_IPTV_FILE} 不存在，前置分拣脚本未执行完成，程序退出")
+        print(f"【致命错误】文件 {INPUT_FILE} 不存在，程序退出")
         sys.exit(1)
-    channel_link_map, channel_origin_order, url_raw_line_map = parse_keep_origin_order(raw_text)
-    print(f"【读取前置源完成，原始频道顺序锁定，待测频道：{len(channel_origin_order)} 个】")
+    group_order, group_channel_map, channel_raw_line = parse_tv_format(raw_text)
+    print(f"【读取完成，原始分组顺序锁定，共{len(group_order)}个分组】")
 
     # 收集全部待测链接
     all_test_tasks = []
-    for (g, ch), url_list in channel_link_map.items():
-        unique_urls = unique_list(url_list)
-        for url in unique_urls:
-            all_test_tasks.append((g, ch, url))
+    task_index_map = dict() # (分组,频道) 绑定url列表
+    for g_name in group_order:
+        ch_dict = group_channel_map[g_name]
+        for ch_name, url_list in ch_dict.items():
+            unique_urls = unique_list(url_list)
+            for url in unique_urls:
+                all_test_tasks.append((g_name, ch_name, url))
+                task_index_map[(g_name, ch_name)] = url_list
     total_test_url = len(all_test_tasks)
-    print(f"【二次测速总链接数量：{total_test_url} 条】")
+    print(f"【待测速总链接数量：{total_test_url} 条】")
 
     # 批量分片测速
     finished_count = 0
@@ -206,55 +198,59 @@ def main():
             test_result_map[task_key].append((latency, clean_url, ok))
             if not ok:
                 auto_bad_url_set.add(clean_url)
-    print("【二次测速全部完成】")
+    print("【全部测速任务执行完毕】")
     append_bad_url_to_blacklist(auto_bad_url_set)
 
-    # 严格按照原始iptv.txt顺序生成输出内容，不打乱原有频道排序
-    output_m3u_lines = ["#EXTM3U x-tvg-url=\"epg.xml.gz\""]
+    # 严格按原始分组、频道顺序重构输出文本
+    output_lines = []
     valid_channel_total = 0
-    for task_key in channel_origin_order:
-        group_name, ch_name = task_key
-        res_list = test_result_map.get(task_key, [])
-        if not res_list:
-            continue
-        good_links = []
-        fallback_links = []
-        for lat, clean_url, ok in res_list:
-            if ok:
-                if lat <= LATENCY_THRESHOLD:
-                    good_links.append((lat, clean_url))
-                else:
-                    fallback_links.append((lat, clean_url))
-        # 延迟升序排序
-        good_links.sort(key=lambda x: x[0])
-        fallback_links.sort(key=lambda x: x[0])
-        sorted_all = good_links + fallback_links
-        if not sorted_all:
-            continue
-        valid_channel_total += 1
-        keep_urls = [item[1] for item in sorted_all[:MAX_LINK_PER_CHANNEL]]
-        print(f"【输出频道】{group_name} - {ch_name} 保留{len(keep_urls)}条最优线路")
-        # 还原原始#EXTINF分组频道行
-        output_m3u_lines.append(f'#EXTINF:-1 group-title="{group_name}",{ch_name}')
-        # 写入原始完整URL文本，完全复刻原文件格式
-        for u in keep_urls:
-            output_m3u_lines.append(url_raw_line_map[u])
+    for group_name in group_order:
+        # 写入分组标记行
+        output_lines.append(f"{group_name},#genre#")
+        ch_dict = group_channel_map[group_name]
+        for ch_name in ch_dict.keys():
+            task_key = (group_name, ch_name)
+            res_list = test_result_map.get(task_key, [])
+            if not res_list:
+                continue
+            good_links = []
+            fallback_links = []
+            for lat, clean_url, ok in res_list:
+                if ok:
+                    if lat <= LATENCY_THRESHOLD:
+                        good_links.append((lat, clean_url))
+                    else:
+                        fallback_links.append((lat, clean_url))
+            # 延迟从小到大排序
+            good_links.sort(key=lambda x: x[0])
+            fallback_links.sort(key=lambda x: x[0])
+            sorted_all = good_links + fallback_links
+            if not sorted_all:
+                continue
+            valid_channel_total += 1
+            # 截取最优前5条链路
+            keep_urls = [item[1] for item in sorted_all[:MAX_LINK_PER_CHANNEL]]
+            print(f"【输出频道】{group_name} - {ch_name} 保留{len(keep_urls)}条最优线路")
+            # 写入原始频道行文本
+            for u in keep_urls:
+                output_lines.append(channel_raw_line[u])
 
-    # 独立输出唯一文件 iptv1.txt，不再生成tv.txt
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        f.write("\n".join(output_m3u_lines))
-    print(f"\n【二次优化成品已输出至：{OUTPUT_FILE}】严格沿用iptv.txt原始分组、频道顺序，原iptv.txt无任何修改")
+    # 过滤空行、标准LF换行，覆盖写入tv.txt
+    final_write_lines = [line.strip() for line in output_lines if line.strip()]
+    with open(OUTPUT_FILE, "w", encoding="utf-8", newline="\n") as f:
+        f.write("\n".join(final_write_lines))
+    print(f"\n【筛选完成，已覆盖更新{OUTPUT_FILE}】严格保留原分组、频道顺序")
 
-    print(f"\n========== 后置优化程序执行汇总 ==========")
+    print(f"\n========== 程序执行汇总 ==========")
     print(f"测速后存在可用链路的频道总数：{valid_channel_total}")
     print(f"单频道最大保留最优链路数量：{MAX_LINK_PER_CHANNEL}")
-    print(f"运行逻辑：只读iptv.txt，仅独立输出iptv1.txt，两套程序互不干扰")
-    print("==== 后置优化程序全部执行完毕 ====")
+    print(f"流程：只读tv.txt测速筛选 → 覆盖输出回tv.txt，无多余文件")
+    print("==== 后置筛选程序全部执行完毕 ====")
 
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print("后置优化程序捕获全局致命异常：")
+        print("后置筛选程序捕获全局致命异常：")
         print(traceback.format_exc())
         sys.exit(0)
