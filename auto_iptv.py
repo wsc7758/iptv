@@ -19,7 +19,7 @@ TV_BOX_OUTPUT = "tv.txt"
 # 测速参数【统一常量】
 STREAM_REQ_TIMEOUT = 3.5
 STREAM_EVAL_WORKERS = 6   # 降低并发，防止容器网络拥堵
-MAX_LINK_PER_CHANNEL = 8
+MAX_LINK_PER_CHANNEL = 10
 FALLBACK_MAX_LINK = 5
 LATENCY_THRESHOLD = 1.2
 # ======================================================
