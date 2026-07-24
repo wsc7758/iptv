@@ -774,3 +774,19 @@ url*http://183.11.239.36:808/hls/36/index.m3u8
 url*http://116.147.108.34:7788/630291707
 url*http://116.52.173.134:1234/962042070
 url*http://42.94.210.57:7788/947472500
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-15
+url*http://183.11.239.36:808/hls/102/index.m3u8
+url*http://222.134.241.132:9909/tsfile/live/0004_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-14
+url*http://8.134.175.232:4022/IPTV-%E5%B9%BF%E4%B8%9C%E7%94%B5%E8%A7%86%E5%8F%B0/CCTV9
+url*http://183.11.239.36:808/hls/51/index.m3u8
+url*http://182.150.23.74:808/hls/30/index.m3u8
+url*http://8.134.175.232:4022/IPTV-%E5%B9%BF%E4%B8%9C%E7%94%B5%E8%A7%86%E5%8F%B0/CCTV13/2
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-13
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-17
+url*http://61.136.172.236:9901/tsfile/live/0130_1.m3u8
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-16
+url*http://183.11.239.36:808/hls/41/index.m3u8
+url*http://42.94.210.57:7788/790187291
