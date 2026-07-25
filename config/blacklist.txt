@@ -790,3 +790,20 @@ url*http://61.136.172.236:9901/tsfile/live/0130_1.m3u8
 url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-16
 url*http://183.11.239.36:808/hls/41/index.m3u8
 url*http://42.94.210.57:7788/790187291
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://61.136.172.236:9901/tsfile/live/0127_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://61.136.172.236:9901/tsfile/live/0121_1.m3u8
+url*http://61.136.172.236:9901/tsfile/live/0014_1.m3u8
+url*http://60.168.105.138:5008/644368714
+url*http://42.94.210.57:7788/738910838
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-4
+url*http://58.57.40.22:9901/tsfile/live/1030_1.m3u8
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-11
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-2
+url*http://61.136.172.236:9901/tsfile/live/0139_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://123.130.84.106:8154/tsfile/live/0138_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-12
+url*http://42.94.210.57:7788/651632648
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-6
+url*http://218.13.148.152:5140/IPTV-%E5%A4%AE%E8%A7%86/CCTV-1
