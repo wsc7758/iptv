@@ -1102,3 +1102,17 @@ url*http://cssbyd.imwork.net:8082/hls/46/index.m3u8
 url*http://183.11.239.36:808/hls/94/index.m3u8
 url*http://182.150.23.74:808/hls/33/index.m3u8
 url*http://61.136.172.236:9901/tsfile/live/0012_1.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://222.134.241.132:9955/tsfile/live/0003_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://61.136.172.236:9901/tsfile/live/0013_1.m3u8
+url*http://211.101.246.28:3000/608807423
+url*http://101.66.194.121:9901/tsfile/live/0117_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://110.154.192.36:7788/630291707
+url*http://101.66.194.129:9901/tsfile/live/0117_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://183.11.239.36:808/hls/169/index.m3u8
+url*http://222.214.208.34:59901/tsfile/live/1001_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://183.11.239.36:808/hls/35/index.m3u8
+url*http://139.155.89.87:1000/849116810
+url*http://139.155.89.87:1000/608831231
+url*http://222.134.241.132:9955/tsfile/live/0001_1.m3u8?key=txiptv&playlive=1&authid=0
