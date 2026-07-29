@@ -1094,3 +1094,11 @@ url*http://183.11.239.36:808/hls/124/index.m3u8
 url*http://112.27.5.218:9901/tsfile/live/faacts/1001_1.m3u8?key=txiptv&playlive=1&authid=0
 url*https://ali-m-l.cztv.com/channels/lantian/channel007/1080p.m3u8
 url*http://pgg.sdmdpx.com:5140/rtsp/112.245.125.39:1554/iptv/import/Tvod/iptv/001/001/ch23122814382128126762.rsc/99912_Uni.sdp
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://123.130.84.106:8154/tsfile/live/0113_1.m3u8
+url*http://bp-resource-dfl.bestv.cn/155/3/video.m3u8
+url*http://cssbyd.imwork.net:8082/hls/46/index.m3u8
+url*http://183.11.239.36:808/hls/94/index.m3u8
+url*http://182.150.23.74:808/hls/33/index.m3u8
+url*http://61.136.172.236:9901/tsfile/live/0012_1.m3u8
