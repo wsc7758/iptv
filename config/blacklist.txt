@@ -1116,3 +1116,13 @@ url*http://183.11.239.36:808/hls/35/index.m3u8
 url*http://139.155.89.87:1000/849116810
 url*http://139.155.89.87:1000/608831231
 url*http://222.134.241.132:9955/tsfile/live/0001_1.m3u8?key=txiptv&playlive=1&authid=0
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://218.13.170.98:9901/tsfile/live/1010_1.m3u8
+url*http://223.247.25.227:1234/738910535
+url*http://139.155.89.87:1000/651632648
+url*http://107.150.60.122/live/cctv6hd.m3u8
+url*http://rihou.cc:555/tv/[mg]陕西卫视
+url*http://58.57.40.22:9901/tsfile/live/1046_1.m3u8
+url*http://58.57.40.22:9901/tsfile/live/1042_1.m3u8
+url*http://101.66.194.129:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0
