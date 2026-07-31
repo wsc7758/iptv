@@ -1218,3 +1218,11 @@ url*http://8.135.27.147:1234/630291707
 url*http://27.12.12.107:1234/624878396
 url*http://116.147.108.169:7788/641886683
 url*http://27.12.12.107:1234/673168140
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://yncbn.ks-cdn.gitv.tv/gitv_live/G_JILIN-HQ/G_JILIN-HQ.m3u8
+url*http://218.13.170.98:9901/tsfile/live/1021_1.m3u8
+url*http://vip1.xinketongxun.fun:8082/tsfile/live/1026_1.m3u8
+url*http://111.231.6.102:1234/608831231
+url*http://58.57.40.22:9901/tsfile/live/1011_1.m3u8
+url*http://111.231.6.102:1234/961023778
