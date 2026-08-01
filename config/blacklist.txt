@@ -1287,3 +1287,18 @@ url*http://106.42.108.174:7788/738910914
 url*http://222.130.32.99:7788/667987558
 url*http://222.130.32.99:7788/947472502
 url*http://222.130.32.99:7788/623899368
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://111.221.137.234:44330/tsfile/live/0132_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://123.130.84.106:8154/tsfile/live/0135_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://183.11.239.36:808/hls/19/index.m3u8
+url*http://113.120.243.10:7788/790187291
+url*http://123.130.84.106:8154/tsfile/live/0135_1.m3u8
+url*http://139.155.89.87:1000/947472496
+url*http://123.130.84.106:8154/tsfile/live/0119_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://61.136.172.236:9901/tsfile/live/0137_1.m3u8
+url*http://61.136.172.236:9901/tsfile/live/0125_1.m3u8
+url*http://123.130.84.106:8154/tsfile/live/0116_1.m3u8
+url*http://58.57.40.22:9901/tsfile/live/0019_1.m3u8
+url*http://222.214.208.34:59901/tsfile/live/0138_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://123.130.84.106:8154/tsfile/live/0132_1.m3u8
