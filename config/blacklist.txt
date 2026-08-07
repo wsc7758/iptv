@@ -1547,3 +1547,10 @@ url*http://27.12.12.100:1234/783847495
 url*http://222.169.85.8:9901/tsfile/live/0135_1.m3u8?key=txiptv&playlive=1&authid=0
 url*http://27.12.12.100:1234/608807420
 url*http://223.247.25.247:1234/952383261
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://gslbmgsplive.miguvideo.com/wd_r2/cctv/jiangsuhd/1200/index.m3u8?msisdn=96c4a9c9e7151750c11593b1fadaa873&mdspid=&spid=699067&netType=0&sid=5500199408&pid=2028597139&timestamp=20260807122036&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=623899368&ParentNodeID=-99&assertID=5500199408&client_ip=39.103.188.159&SecurityKey=20260807122036&promotionId=&mvid=5100156802&mcid=500020&playurlVersion=WX-A1-9.8.0-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=c498e90feebb68d60467fd426c68b1b3&ddCalcu=3cb4v19ab8b8ea69c06f2e4edbfb76684d06&sv=10004&ct=android
+url*http://ali-xwl.cztv.com/live/channel01720Plxw.m3u8
+url*http://182.150.23.74:808/hls/19/index.m3u8
+url*http://222.169.85.8:9901/tsfile/live/0119_1.m3u8
+url*http://123.130.84.106:8154/tsfile/live/0123_1.m3u8
