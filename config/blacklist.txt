@@ -1743,3 +1743,18 @@ url*http://139.227.21.22:9901/tsfile/live/0003_1.m3u8?key=txiptv&playlive=1&auth
 url*http://61.136.172.236:9901/tsfile/live/0126_1.m3u8
 url*http://182.150.23.74:808/hls/38/index.m3u8
 url*http://58.56.162.102:4466/newlive/live/hls/39/live.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://139.227.21.22:9901/tsfile/live/0002_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://139.227.21.22:9901/tsfile/live/0122_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://123.118.53.84:45237/tsfile/live/0111_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://123.163.21.227:9901/tsfile/live/0124_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://58.19.43.66:1111/tsfile/live/0132_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://123.118.55.165:45237/tsfile/live/0119_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://112.27.235.94:8000/hls/43/index.m3u8
+url*http://123.118.53.84:45237/tsfile/live/0109_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://111.76.19.197:1234/947472502
+url*http://123.118.53.84:45237/tsfile/live/0119_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://58.19.43.66:1111/tsfile/live/0122_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://123.118.55.165:45237/tsfile/live/0111_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://113.101.119.74:8090/hls/118/index.m3u8
