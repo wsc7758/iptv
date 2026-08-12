@@ -1970,3 +1970,13 @@ url*http://111.76.19.197:1234/630291707
 url*http://47.100.80.251:50001/673168223
 url*http://58.56.162.102:4466/newlive/live/hls/17/live.m3u8
 url*http://111.76.19.197:1234/952383261
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://223.78.65.165:9901/tsfile/live/0017_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/chcymdy/51/20250415/index.m3u8?msisdn=2c2b3d9b95c3ae31ddf90e85311929a2&mdspid=&spid=699004&netType=0&sid=5910022176&pid=2028597139&timestamp=20260812092119&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=952383261&ParentNodeID=-99&assertID=5910022176&client_ip=47.92.23.141&SecurityKey=20260812092119&promotionId=&mvid=5900006704&mcid=500020&playurlVersion=WX-A1-9.8.0-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=5b2b7eb8da1971cf55ec642c251a870d&ddCalcu=d50bv72a8baa7a1e5b28cd2a4169c7e15c5f&sv=10004&ct=android
+url*http://123.118.55.165:45237/tsfile/live/0110_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://112.27.235.94:8000/hls/37/index.m3u8
+url*http://61.136.172.236:9901/tsfile/live/0113_1.m3u8
+url*http://123.130.84.106:8154/tsfile/live/0109_1.m3u8
+url*http://113.26.202.52:1299/tsfile/live/0115_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://113.57.20.185:1111/tsfile/live/1008_1.m3u8?key=txiptv&playlive=1&authid=0
