@@ -2089,3 +2089,10 @@ url*http://27.12.12.40:1234/962042070
 url*http://42.94.210.22:7788/961023778
 url*http://139.227.21.22:9901/tsfile/live/0012_1.m3u8?key=txiptv&playlive=1&authid=0
 url*http://116.52.173.67:1234/947472496
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://59.39.89.130:60901/tsfile/live/0125_12.m3u8?key=txiptv&playlive=1&authid=0
+url*http://111.8.242.104:8088/tsfile/live/1063_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://139.155.89.87:1000/673168256
+url*http://123.175.209.118:9003/hls/27/index.m3u8
+url*http://223.78.65.165:9901/tsfile/live/0016_1.m3u8?key=txiptv&playlive=1&authid=0
