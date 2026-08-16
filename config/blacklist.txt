@@ -2259,3 +2259,7 @@ url*http://42.94.210.22:7788/608807423
 url*http://116.147.111.62:7788/624878356
 url*http://61.136.172.236:9901/tsfile/live/0015_1.m3u8?key=txiptv&playlive=1&authid=0
 url*http://116.147.111.62:7788/790187291
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://27.39.122.2:9901/tsfile/live/1069_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://139.155.89.87:1000/624878356
