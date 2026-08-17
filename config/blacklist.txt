@@ -2266,3 +2266,15 @@ url*http://139.155.89.87:1000/624878356
 
 # 自动测速检测失效链接 url|auto_bad
 url*http://27.39.122.2:9901/tsfile/live/1063_1.m3u8?key=txiptv&playlive=1&authid=0
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://58.57.40.22:9901/tsfile/live/1031_1.m3u8
+url*http://111.8.242.127:9999/tsfile/live/1000_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://118.193.115.2:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://111.8.224.6:9999/tsfile/live/1056_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://120.40.39.246:352/newlive/live/hls/12/live.m3u8
+url*http://27.39.122.2:9901/tsfile/live/1075_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://139.155.89.87:1000/673168185
+url*http://42.94.210.16:7788/952383261
+url*http://118.193.115.2:9901/tsfile/live/0121_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://27.39.122.2:9901/tsfile/live/1056_1.m3u8?key=txiptv&playlive=1&authid=0
