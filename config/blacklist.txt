@@ -2337,3 +2337,12 @@ url*http://115.29.208.41:23002/live/4005.m3u8
 url*http://42.94.210.16:7788/790187291
 url*http://42.94.210.16:7788/630287636
 url*http://1.192.153.44:9901/tsfile/live/0109_1.m3u8?key=txiptv&playlive=1&authid=0
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://120.40.39.246:352/newlive/live/hls/31/live.m3u8
+url*http://222.169.85.8:9901/tsfile/live/0003_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://222.169.85.8:9901/tsfile/live/0001_1.m3u8
+url*http://112.46.85.60:8009/hls/509/index.m3u8
+url*http://111.59.24.227:8181/tsfile/live/0142_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://61.136.172.236:9901/tsfile/live/0117_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://104.152.209.49:8181/720p/jsws.m3u8
