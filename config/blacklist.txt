@@ -2395,3 +2395,7 @@ url*http://27.12.12.101:1234/947472506
 url*http://221.232.198.40:7777/tsfile/live/1073_1.m3u8?key=txiptv&playlive=1&authid=0
 url*http://223.247.25.235:1234/947472500
 url*http://222.71.55.147:9901/tsfile/live/0109_1.m3u8?key=txiptv&playlive=0&authid=0
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://58.56.162.102:4466/newlive/live/hls/8/live.m3u8
+url*http://118.122.144.115:8888/newlive/live/hls/35/live.m3u8
