@@ -2399,3 +2399,8 @@ url*http://222.71.55.147:9901/tsfile/live/0109_1.m3u8?key=txiptv&playlive=0&auth
 # 自动测速检测失效链接 url|auto_bad
 url*http://58.56.162.102:4466/newlive/live/hls/8/live.m3u8
 url*http://118.122.144.115:8888/newlive/live/hls/35/live.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://171.38.148.188:9003/hls/60/index.m3u8
+url*http://221.226.51.220:50081/newlive/live/hls/7/live.m3u8
+url*http://171.38.148.188:9003/hls/32/index.m3u8
