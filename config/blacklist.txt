@@ -2404,3 +2404,12 @@ url*http://118.122.144.115:8888/newlive/live/hls/35/live.m3u8
 url*http://171.38.148.188:9003/hls/60/index.m3u8
 url*http://221.226.51.220:50081/newlive/live/hls/7/live.m3u8
 url*http://171.38.148.188:9003/hls/32/index.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://112.27.5.218:9901/tsfile/live/faacts/0001_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://112.27.5.218:9901/tsfile/live/0002_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://120.40.39.246:352/newlive/live/hls/13/live.m3u8
+url*http://yncbn.ks-cdn.gitv.tv/gitv_live/G_HEILONGJIANG-HQ/G_HEILONGJIANG-HQ.m3u8
+url*http://111.59.24.227:8181/tsfile/live/0126_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://111.59.24.227:8181/tsfile/live/1030_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://120.40.39.246:352/newlive/live/hls/5/live.m3u8
