@@ -2454,3 +2454,9 @@ url*http://222.214.208.34:59901/tsfile/live/0010_1.m3u8?key=txiptv&playlive=1&au
 url*http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225736/2/index.m3u8
 url*http://[2409:8087:3428:20:500::1009]:6610/PLTV/88888888/224/3221225862/index.m3u8?servicetype=1&IASHttpSessionId=RR423820220409134714119178
 url*http://222.214.208.34:59901/tsfile/live/0137_1.m3u8?key=txiptv&playlive=1&authid=0
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://61.178.227.57:9901/tsfile/live/0115_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://satellitepull.cnr.cn/live/wxscws/playlist.m3u8
+url*http://111.231.6.102:1234/641886773
+url*http://218.13.138.139:59901/tsfile/live/0115_1.m3u8?key=txiptv&playlive=1&authid=0
