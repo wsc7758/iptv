@@ -2460,3 +2460,15 @@ url*http://61.178.227.57:9901/tsfile/live/0115_1.m3u8?key=txiptv&playlive=1&auth
 url*http://satellitepull.cnr.cn/live/wxscws/playlist.m3u8
 url*http://111.231.6.102:1234/641886773
 url*http://218.13.138.139:59901/tsfile/live/0115_1.m3u8?key=txiptv&playlive=1&authid=0
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://113.57.140.161:10081/newlive/live/hls/33/live.m3u8
+url*http://222.169.85.8:9901/tsfile/live/0007_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://111.59.24.227:8181/tsfile/live/0004_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://116.52.173.151:1234/961023778
+url*http://112.27.5.218:9901/tsfile/live/1002_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://223.247.25.235:1234/630291707
+url*http://112.27.5.218:9901/tsfile/live/faacts/1035_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://111.59.24.227:8181/tsfile/live/0016_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://116.52.173.151:1234/947472500
+url*http://116.52.173.151:1234/956923145
