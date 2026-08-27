@@ -22,3 +22,4 @@ https://raw.githubusercontent.com/develop202/migu_video/refs/heads/main/interfac
 https://fastgit.cc/https://raw.githubusercontent.com/iTCoffe/Collect-iTV/main/Internet_iTV.m3u
 https://szyyds.cn/tv/live/x.txt
 https://ghproxy.net/https://raw.githubusercontent.com/ssili126/tv/main/itvlist.txt
+https://gh-proxy.org/https://raw.githubusercontent.com/vbskycn/iptv/master/tv/iptv4.txt
