@@ -4,7 +4,6 @@ on:
   schedule:
     # 每日 北京时间 02:00 执行更新
     - cron: '0 3 * * *'
-    - cron: '0 12 * * *'
 env:
   TZ: Asia/Shanghai
 
