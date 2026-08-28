@@ -2775,3 +2775,12 @@ url*http://116.52.173.172:1234/673168256
 url*http://113.98.11.46:3000/673168140
 url*http://27.12.12.174:1234/623899368
 url*http://27.12.12.174:1234/783847495
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://117.63.79.182:1234/641886683
+url*http://42.94.210.16:7788/947472496
+url*http://110.154.192.81:7788/624878440
+url*http://rihou.cc:555/tv/[mg]江西卫视
+url*http://222.214.208.34:59901/tsfile/live/0009_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://223.78.65.165:9901/tsfile/live/0006_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://221.226.51.220:50081/newlive/live/hls/34/live.m3u8
