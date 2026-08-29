@@ -2784,3 +2784,11 @@ url*http://rihou.cc:555/tv/[mg]江西卫视
 url*http://222.214.208.34:59901/tsfile/live/0009_1.m3u8?key=txiptv&playlive=1&authid=0
 url*http://223.78.65.165:9901/tsfile/live/0006_1.m3u8?key=txiptv&playlive=1&authid=0
 url*http://221.226.51.220:50081/newlive/live/hls/34/live.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://42.94.210.16:7788/624878356
+url*http://rihou.cc:555/tv/[mg]CCTV-12
+url*http://115.48.161.239:9901/tsfile/live/0013_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://115.48.161.239:9901/tsfile/live/0002_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://204.12.221.218:8181/3m1080p/cctv11.m3u8
+url*http://116.52.173.172:1234/644368714
