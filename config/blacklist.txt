@@ -3117,3 +3117,8 @@ url*http://rihou.cc:555/tv/[mg]CCTV-02
 url*http://rihou.cc:555/tv/[mg]CCTV-06
 url*http://rihou.cc:555/tv/[mg]CCTV-14
 url*http://rihou.cc:555/tv/[mg]CCTV-03
+
+# 自动测速检测失效链接 url|auto_bad
+url*https://itv.1920.qzz.io/api/ysp.php?id=tjws
+url*http://gmxw.7766.org:808/hls/45/index.m3u8
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/chcymdy/51/20250415/index.m3u8?msisdn=3e02566cb1fcbbd7d740c91c82b2376b&mdspid=&spid=699004&netType=0&sid=5910022176&pid=2028597139&timestamp=20260907112118&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=952383261&ParentNodeID=-99&assertID=5910022176&client_ip=39.103.182.111&SecurityKey=20260907112118&promotionId=&mvid=5900006704&mcid=500020&playurlVersion=WX-A1-9.8.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=67825dcc55889e0f98f220a7b2f3746e&ddCalcu=e667v48a72a35afd2cbc75a5082829fe809f&sv=10004&ct=android
