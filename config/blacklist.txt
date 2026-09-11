@@ -3255,3 +3255,11 @@ url*http://58.57.40.22:9901/tsfile/live/1002_1.m3u8
 url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv15
 url*http://t.061899.xyz/tl/tl.php?id=jxws
 url*http://111.76.19.251:1234/624878440
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://125.42.148.178:9901/tsfile/live/0127_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://125.42.148.178:9901/tsfile/live/1004_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://t.061899.xyz/tl/tl.php?id=gzws
+url*http://125.42.148.178:9901/tsfile/live/0135_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv12
+url*http://m.061899.xyz/mg/cctv15
