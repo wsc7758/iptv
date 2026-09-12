@@ -3263,3 +3263,13 @@ url*http://t.061899.xyz/tl/tl.php?id=gzws
 url*http://125.42.148.178:9901/tsfile/live/0135_1.m3u8?key=txiptv&playlive=1&authid=0
 url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv12
 url*http://m.061899.xyz/mg/cctv15
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://137.175.111.185/migu/?id=hljws
+url*http://t.061899.xyz/tl/tl.php?id=jlws
+url*http://t.061899.xyz/tl/tl.php?id=jsws
+url*http://t.061899.xyz/tl/tl.php?id=xzws
+url*http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226582/index.m3u8
+url*http://go.bkpcp.top/mg/cctv15
+url*https://itv.1920.qzz.io/api/ysp.php?id=hljws
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=a1ab1392aabe6c3b364dc230b2dc3cc4&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20260912115047&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.182.111&SecurityKey=20260912115047&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=ZQ-A1-9.9.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=61caebe5b5d57f6707a24fa17f141cf6&ddCalcu=66f1vcca1al4ea1bfe751ba5fd4527af7607&sv=10004&ct=android
