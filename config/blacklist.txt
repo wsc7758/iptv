@@ -3407,3 +3407,12 @@ url*http://120.196.232.124:8088/000000001001PLTV/651/224/3221227609/1.m3u8?HlsPr
 url*http://223.247.25.200:1234/630291707
 url*http://111.76.19.227:1234/651632648
 url*http://36.104.221.118:7788/630287636
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://t.061899.xyz/tl/tl.php?id=szws
+url*http://123.129.70.178:9901/tsfile/live/0143_1.m3u8
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=641fb8dd4460316ce277142a76f767ae&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20260914115048&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.188.159&SecurityKey=20260914115048&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=7c9ecc9c565ced71febdb14fd9fa9d23&ddCalcu=372cvd9a9elacafc99dcf54615bcdebde7f1&sv=10004&ct=android
+url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv17
+url*http://yncbn.ks-cdn.gitv.tv/gitv_live/G_SICHUAN-HQ/G_SICHUAN-HQ.m3u8
+url*http://111.225.95.13:8800/hls/40/index.m3u8
+url*http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226467/index.m3u8
