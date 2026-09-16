@@ -3524,3 +3524,13 @@ url*http://117.63.79.167:1234/624878405
 url*http://223.247.25.200:1234/673168140
 url*http://27.12.12.57:1234/624878396
 url*http://123.163.114.241:9901/tsfile/live/0128_1.m3u8?key=txiptv&playlive=1&authid=0
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://110.154.192.86:7788/947472506
+url*http://t.061899.xyz/tl/tl.php?id=dnws
+url*http://k.061899.xyz/m.php?id=xzws
+url*http://1.197.251.151:9901/tsfile/live/0131_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://t.061899.xyz/tl/tl.php?id=bjws
+url*http://go.bkpcp.top/mg/cctv12
+url*http://111.61.236.247:9081/hls/49/index.m3u8
+url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv6
