@@ -3783,3 +3783,12 @@ url*http://222.140.52.11:1234/630287636
 url*http://222.140.52.11:1234/624878356
 url*http://116.52.173.191:1234/624878405
 url*http://27.12.12.103:1234/673168256
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://t.061899.xyz/tl/tl.php?id=zjws
+url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv11
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=014679de9803c8cb1d8eab135dd21220&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20260921115047&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.188.159&SecurityKey=20260921115047&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=76f34846db383d533e508b1f6b4215fe&ddCalcu=e7f6v5fa13l24a48b466fd1bb388035de533&sv=10004&ct=android
+url*http://223.247.25.208:1234/641886773
+url*http://k.061899.xyz/m.php?id=zjws
+url*http://go.bkpcp.top/mg/cctv14
+url*http://192.151.150.154/live/cctv9hd.m3u8
