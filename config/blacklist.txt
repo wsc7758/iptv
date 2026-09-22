@@ -3792,3 +3792,27 @@ url*http://223.247.25.208:1234/641886773
 url*http://k.061899.xyz/m.php?id=zjws
 url*http://go.bkpcp.top/mg/cctv14
 url*http://192.151.150.154/live/cctv9hd.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://[2409:8087:3428:20:500::1009]:6610/PLTV/88888888/224/3221227201/index.m3u8?servicetype=1&IASHttpSessionId=RR423820220409134714119178
+url*http://[2409:8087:4400:20:1:a0f:11:9]/iptv.cdn.ha.chinamobile.com/PLTV/88888888/224/3221226632/index.m3u8
+url*http://fn.gcl.de5.net:5908/gsh950428/947472502
+url*https://itv.1920.qzz.io/api/ysp.php?id=hnws2
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=8d9c5075bfab5d573010d63c687bd7e6&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20260922115045&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.188.159&SecurityKey=20260922115045&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=b34e069025ead03acc3b1fd728ace557&ddCalcu=7b53v54aeelc0aa6892072d5fe1abd30c3ca&sv=10004&ct=android
+url*https://live.mxdyeah.top/live.php?id=hainanSD
+url*http://m.061899.xyz/mg/cctv13
+url*http://[2409:8087:1a01:df::4077]/PLTV/88888888/224/3221225974/index.m3u8
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/chcymdy/51/20250415/index.m3u8?msisdn=bab8b2d4cf84f3d3d461eaa8768aa44e&mdspid=&spid=699004&netType=0&sid=5910022176&pid=2028597139&timestamp=20260922115102&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=952383261&ParentNodeID=-99&assertID=5910022176&client_ip=39.103.182.111&SecurityKey=20260922115102&promotionId=&mvid=5900006704&mcid=500020&playurlVersion=WX-A1-9.9.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=26c0af94d98cb141ef9dcf12f083878d&ddCalcu=d286v7ca80a3aa8f09f42d19f8ccdb91f4e1&sv=10004&ct=android
+url*http://m.061899.xyz/mg/cctv5p
+url*http://[2409:8087:1a01:df::4077]/PLTV/88888888/224/3221226030/index.m3u8
+url*http://120.245.84.95:1234/947472502
+url*http://go.bkpcp.top/mg/cctv2
+url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv13
+url*http://tvbox6.icu/tv/migu.php?id=hinws
+url*http://204.12.221.218:8181/3m1080p/hews.m3u8
+url*http://m.061899.xyz/mg/cctv8
+url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv8
+url*http://[2409:8087:3428:20:500::1009]:6610/PLTV/88888888/224/3221225838/index.m3u8?servicetype=1&IASHttpSessionId=RR423820220409134714119178
+url*http://116.52.173.191:1234/641886683
+url*http://m.061899.xyz/mg/cctv5
+url*http://go.bkpcp.top/mg/cctv4
