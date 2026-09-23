@@ -3816,3 +3816,7 @@ url*http://[2409:8087:3428:20:500::1009]:6610/PLTV/88888888/224/3221225838/index
 url*http://116.52.173.191:1234/641886683
 url*http://m.061899.xyz/mg/cctv5
 url*http://go.bkpcp.top/mg/cctv4
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://go.bkpcp.top/mg/cctv10
+url*http://k.061899.xyz/m.php?id=gxws
