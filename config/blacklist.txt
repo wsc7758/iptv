@@ -3820,3 +3820,10 @@ url*http://go.bkpcp.top/mg/cctv4
 # 自动测速检测失效链接 url|auto_bad
 url*http://go.bkpcp.top/mg/cctv10
 url*http://k.061899.xyz/m.php?id=gxws
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://101.66.194.117:9901/tsfile/live/0143_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://198.204.228.26/live/cctv9hd.m3u8
+url*http://111.61.236.247:9081/hls/51/index.m3u8
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=0609c58f958c6e3e1e6631926969cf4c&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20260924115044&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.188.159&SecurityKey=20260924115044&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=896ba3d743856b63370b905407a4ba4e&ddCalcu=e849va6abbl4aaa37d0744530895b60b7633&sv=10004&ct=android
+url*http://173.208.212.130:8181/720p/cctv5.m3u8
