@@ -3845,3 +3845,8 @@ url*http://58.57.40.22:9901/tsfile/live/1036_1.m3u8
 url*http://58.57.40.22:9901/tsfile/live/1028_1.m3u8
 url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=7f1a1ef4c7ba5977428f3ef59fb95516&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20260926115045&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.188.159&SecurityKey=20260926115045&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=4637bfdead6a6576c233df05a7b1eee8&ddCalcu=84e6ve3ae7l1babf7dae5a0df6da363527c6&sv=10004&ct=android
 url*http://60.168.108.94:1234/947472502
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://107.150.60.122/live/cctv12hd.m3u8
+url*http://117.72.81.53:3000/738910914
+url*http://107.150.60.122/live/qhws.m3u8
