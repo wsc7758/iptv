@@ -3885,3 +3885,7 @@ url*http://107.150.60.122/live/tjwshd.m3u8
 url*http://101.35.240.114:88/live.php?id=黑龙江卫视
 url*http://k.061899.xyz/m.php?id=hinws
 url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv10
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://go.bkpcp.top/mg/cctv3
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=b1176d85c46690f5326f8f81fa9e17fe&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20260930125046&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.182.111&SecurityKey=20260930125046&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=a1d914915a698db7fcf7ff8fe286253b&ddCalcu=ba31v5da29l61a8429e1f58af6f978fdcbf7&sv=10004&ct=android
