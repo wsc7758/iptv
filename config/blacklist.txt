@@ -3889,3 +3889,29 @@ url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv10
 # 自动测速检测失效链接 url|auto_bad
 url*http://go.bkpcp.top/mg/cctv3
 url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=b1176d85c46690f5326f8f81fa9e17fe&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20260930125046&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.182.111&SecurityKey=20260930125046&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=a1d914915a698db7fcf7ff8fe286253b&ddCalcu=ba31v5da29l61a8429e1f58af6f978fdcbf7&sv=10004&ct=android
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://rihou.cc:555/tv/[mg]东方卫视
+url*http://rihou.cc:555/tv/[mg]湖北卫视
+url*http://rihou.cc:555/tv/[mg]CCTV-09
+url*http://[2409:8087:3428:20:500::1009]:6610/PLTV/88888888/224/3221227119/index.m3u8?servicetype=1&IASHttpSessionId=RR423820220409134714119178
+url*http://101.35.240.114:88/live.php?id=海南卫视
+url*http://live.aishang.ctlcdn.com/00000110240059_1/playlist.m3u8?CONTENTID=00000110240059_1&AUTHINFO=FABqh274XDn8fkurD5614t%2B1RvYajgx%2Ba3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom%2BXaXZYzB%2FQfYjeYzGgKhP%2Fdo%2BXpr4quVxlkA%2BubKvbU1XwJFRgrbX%2BnTs60JauQUrav8kLj%2FPH8LxkDFpzvkq75UfeY%2FVNDZygRZLw4j%2BXtwhj%2FIuXf1hJAU0X%2BheT7g%3D%3D&USERTOKEN=eHKuwve%2F35NVIR5qsO5XsuB0O2BhR0KR
+url*http://82.156.245.233:30008/849116810
+url*http://[2409:8087:2001:20:2800:0:df6e:eb1b]/wh7f454c46tw1221605145_-1738716276/ott.mobaibox.com/PLTV/3/224/3221227554/index.m3u8
+url*http://[2409:8087:1e03:21::2]:6060/cms001/ch00000090990000001450/index.m3u8
+url*http://k.061899.xyz/m.php?id=dnws
+url*http://[2409:8087:4400:20:1:a0f:11:9]/iptv.cdn.ha.chinamobile.com/PLTV/88888888/224/3221226584/index.m3u8
+url*http://gslbmgsplive.miguvideo.com/envivo_x/SD/lvyou/711/index.m3u8?msisdn=4bda45d11c7181f4a60a5146b7b5bf73&mdspid=&spid=600633&netType=0&sid=5910022165&pid=2028597139&timestamp=20261001125042&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=947472502&ParentNodeID=-99&assertID=5910022165&client_ip=39.103.182.111&SecurityKey=20261001125042&promotionId=&mvid=5900004359&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=adc92ac2690d791b04b5759cc5f406d6&ddCalcu=6addv6ca09z42afa5cc2c699507d57b9410b&sv=10004&ct=android
+url*http://rihou.cc:555/tv/[mg]河南卫视
+url*https://txmov2.a.kwimgs.com/bs3/video-hls/5219953535631090825_hlsb.m3u8
+url*http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225727/2/index.m3u8
+url*http://101.35.240.114:88/live.php?id=CHC影迷电影
+url*http://bztv.tvbus.cc:8081/cdnlive/cctv13.m3u8
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/chcymdy/51/20250415/index.m3u8?msisdn=712bb04ee57cc7942b6089f62715e3c6&mdspid=&spid=699004&netType=0&sid=5910022176&pid=2028597139&timestamp=20261001125102&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=952383261&ParentNodeID=-99&assertID=5910022176&client_ip=39.103.182.111&SecurityKey=20261001125102&promotionId=&mvid=5900006704&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=0e1c774344ec32745fa91c8956fe37dc&ddCalcu=c0dev71a3cae7af764539484ce1c93a2f754&sv=10004&ct=android
+url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv4
+url*http://198.204.228.26/live/cctv8hd.m3u8
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=4a6b386c240ef9889f554623847644b7&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20261001125045&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.188.159&SecurityKey=20261001125045&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=30c08b0879a93308e7f8b6b935fa25f7&ddCalcu=73f0v5ca20la8afb503897b96ab983f370e8&sv=10004&ct=android
+url*http://1.94.31.214/php/py/k-web/ku9/py/socks5.py?ip=111.43.114.137:1080&u=http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226465/index.m3u8
+url*http://rihou.cc:555/tv/[mg]CCTV-17
+url*https://zby.130519.xyz/PLTV/11/224/3221226154/index.m3u8
