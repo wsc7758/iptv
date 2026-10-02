@@ -3915,3 +3915,15 @@ url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msi
 url*http://1.94.31.214/php/py/k-web/ku9/py/socks5.py?ip=111.43.114.137:1080&u=http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226465/index.m3u8
 url*http://rihou.cc:555/tv/[mg]CCTV-17
 url*https://zby.130519.xyz/PLTV/11/224/3221226154/index.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://114.102.131.146:5080/956923145
+url*http://204.12.221.218:8181/3m1080p/cctv13.m3u8
+url*http://rihou.cc:555/tv/[mg]深圳卫视
+url*http://114.102.131.146:5080/849116810
+url*http://114.102.131.146:5080/641886683
+url*http://rihou.cc:555/tv/[mg]海南卫视
+url*http://114.102.131.146:5080/644368714
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=d4e1321ec2fe6764ddb9710dd4f9662d&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20261002125047&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.182.111&SecurityKey=20261002125047&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=3ee8fd1fa4de7a0a233ea8b41c6973d8&ddCalcu=83dev3ea78l9fa6dc11f4ab48daee73a302a&sv=10004&ct=android
+url*http://rihou.cc:555/tv/[mg]山东卫视
+url*http://rihou.cc:555/tv/[mg]江苏卫视
