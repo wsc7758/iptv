@@ -4154,3 +4154,15 @@ url*http://rihou.cc:555/tv/[mg]CCTV-13
 url*http://120.40.39.246:352/newlive/live/hls/2/live.m3u8
 url*http://204.12.221.218:8181/3m1080p/jxws.m3u8
 url*http://gfr.x3322.net:9901/tsfile/live/1095_1.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://k.061899.xyz/m.php?id=jsws
+url*http://114.102.131.159:5080/947472500
+url*http://114.102.131.159:5080/624878396
+url*http://110.40.170.5:8890/diai/live_iptv.php?id=7&token=sfjfd78tfk
+url*http://114.102.131.159:5080/952383261
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=2ede53ea2c3e7e6b51ffe01c0b567b5b&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20261006125044&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.188.159&SecurityKey=20261006125044&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=07cf235ac17930babff36b310836d57b&ddCalcu=b077v5cadfl62a33850a1c31b76933f0fbba&sv=10004&ct=android
+url*http://61.136.172.236:9901/tsfile/live/0139_1.m3u8
+url*http://110.40.170.5:8890/diai/live_iptv.php?id=9&token=sfjfd78tfk
+url*http://114.102.131.159:5080/644368373
+url*http://k.061899.xyz/m.php?id=tjws
