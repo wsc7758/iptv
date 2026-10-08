@@ -4179,3 +4179,7 @@ url*http://bztv.tvbus.cc:8081/cdnlive/cctv8.m3u8
 url*http://204.12.221.218:8181/3m1080p/cctv5p.m3u8
 url*http://120.40.39.246:352/newlive/live/hls/1/live.m3u8
 url*http://gslbmgsplive.miguvideo.com/migu/kailu/chcymdy/51/20250415/index.m3u8?msisdn=aeffde5426e93605f3716fae766a01e6&mdspid=&spid=699004&netType=0&sid=5910022176&pid=2028597139&timestamp=20261007125102&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=952383261&ParentNodeID=-99&assertID=5910022176&client_ip=39.103.182.111&SecurityKey=20261007125102&promotionId=&mvid=5900006704&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=19bac510c14c0368e29dc97d34211bb1&ddCalcu=11b9vbba1aa1ca254130dc7194ccd09326e8&sv=10004&ct=android
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://bztv.tvbus.cc:8081/cdnlive/cctv7.m3u8
+url*http://m.061899.xyz/mg/cctv7
