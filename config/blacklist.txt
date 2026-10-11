@@ -4206,3 +4206,14 @@ url*http://36.104.221.222:7788/947472502
 url*http://120.211.62.180:8000/hls/37/index.m3u8
 url*http://204.12.221.218:8181/3m1080p/cctv12.m3u8
 url*http://gslbmgsplive.miguvideo.com/migu/kailu/chcymdy/51/20250415/index.m3u8?msisdn=6667004e8de8d846e7725cbac4c4810e&mdspid=&spid=699004&netType=0&sid=5910022176&pid=2028597139&timestamp=20261010125104&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=952383261&ParentNodeID=-99&assertID=5910022176&client_ip=39.103.188.159&SecurityKey=20261010125104&promotionId=&mvid=5900006704&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=26f0a74eb174d9101fc13e4a1b8e664a&ddCalcu=a246v6fa60aeaa87b41eab41e7341dc9f110&sv=10004&ct=android
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://101.66.198.62:9901/tsfile/live/0124_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://cdn6.bkpcp.top/tl/tuiliu.php?id=cctv1
+url*http://101.66.195.51:9901/tsfile/live/0124_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://101.66.195.51:9901/tsfile/live/0143_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://204.12.221.218:8181/3m1080p/cctv6.m3u8
+url*http://bztv.tvbus.cc:8081/cdnlive/cctv5p.m3u8
+url*http://107.150.60.122/live/cctv14hd.m3u8
+url*http://101.66.198.62:9901/tsfile/live/0143_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=6b6799505254b54977d041462ded9658&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20261011125044&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.182.111&SecurityKey=20261011125044&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=c6624bcf6668a406673b4a4194202a7f&ddCalcu=fc76va6a22l04a2b4c9f1646a648ba347066&sv=10004&ct=android
