@@ -4236,3 +4236,8 @@ url*http://k.061899.xyz/m.php?id=jlws
 url*http://gslbmgsplive.miguvideo.com/migu/kailu/chcymdy/51/20250415/index.m3u8?msisdn=751159a42fa546d54d8024f65d7b3f31&mdspid=&spid=699004&netType=0&sid=5910022176&pid=2028597139&timestamp=20261013135102&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=952383261&ParentNodeID=-99&assertID=5910022176&client_ip=39.103.188.159&SecurityKey=20261013135102&promotionId=&mvid=5900006704&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=f22132b23bd042acb7abbac3c7cf1525&ddCalcu=5f22v52a11af3ac27bc233cbadb0b4a27abc&sv=10004&ct=android
 url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=05dfa788fe2437f5bb4630f0bca07b1f&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20261013135044&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.188.159&SecurityKey=20261013135044&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.9.2-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=d21cc5ebaa163ab4cea0eb1457207595&ddCalcu=5d92v51a7cl0ca257e5b4a1ab1e603aaebc4&sv=10004&ct=android
 url*http://36.36.238.246:7788/641886773
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://101.66.195.137:9901/tsfile/live/0016_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://k.061899.xyz/m.php?id=sdws
+url*http://111.61.236.247:9081/hls/45/index.m3u8
