@@ -4313,3 +4313,22 @@ url*http://27.11.102.110:3000/641886683
 url*http://27.11.102.110:3000/623899368
 url*http://112.103.141.26:1234/641886683
 url*http://27.11.102.110:3000/624878356
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://m.061899.xyz/mg/cctv1
+url*http://k.061899.xyz/m.php?id=gzws
+url*http://101.66.195.192:9901/tsfile/live/0143_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://k.061899.xyz/m.php?id=szws
+url*http://112.194.199.151:7788/947472502
+url*http://101.66.195.137:9901/tsfile/live/0113_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://101.66.195.192:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://101.66.195.137:9901/tsfile/live/0139_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://go.bkpcp.top/mg/cctv7
+url*http://101.66.195.137:9901/tsfile/live/0143_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://180.119.6.123:3000/947472502
+url*http://go.bkpcp.top/mg/cctv1
+url*http://101.66.195.192:9901/tsfile/live/0113_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://k.061899.xyz/m.php?id=jxws
+url*http://go.bkpcp.top/mg/cctv8
+url*http://101.66.195.137:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0
+url*http://k.061899.xyz/m.php?id=btws
