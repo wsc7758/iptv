@@ -4347,3 +4347,13 @@ url*http://101.66.195.192:9901/tsfile/live/0139_1.m3u8?key=txiptv&playlive=0&aut
 url*http://101.66.195.137:9901/tsfile/live/0125_1.m3u8?key=txiptv&playlive=0&authid=0
 url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=dcc84887b875d0ceaa154e4a337d6f17&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20261018115042&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.188.159&SecurityKey=20261018115042&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.10.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=70a8db66b0d6ec0f4a12c8a634bdeee1&ddCalcu=17e0veaae8lddabb46366ba08dc62e1ca04f&sv=10004&ct=android
 url*http://gslbmgsplive.miguvideo.com/envivo_x/SD/lvyou/711/index.m3u8?msisdn=12937fd66b8445283b8e06c2563a8d56&mdspid=&spid=600633&netType=0&sid=5910022165&pid=2028597139&timestamp=20261018115040&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=947472502&ParentNodeID=-99&assertID=5910022165&client_ip=39.103.188.159&SecurityKey=20261018115040&promotionId=&mvid=5900004359&mcid=500020&playurlVersion=WX-A1-9.10.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=fba64628d0c83094d38e6e1e17101914&ddCalcu=4f1bv9aa16z04a167218ed10ec68e38039d4&sv=10004&ct=android
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://[2409:8087:2001:20:2800:0:df6e:eb03]/wh7f454c46tw1874077489_789689702/ott.mobaibox.com/PLTV/3/224/3221228130/index.m3u8
+url*http://[2409:8087:1a01:df::4077]/PLTV/88888888/224/3221226013/index.m3u8
+url*http://192.151.150.154/live/cctv11hd.m3u8
+url*http://198.204.228.26/live/cctv10hd.m3u8
+url*http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225680/2/index.m3u8
+url*http://[2409:8087:3428:20:500::1009]:6610/PLTV/88888888/224/3221227099/index.m3u8?servicetype=1&IASHttpSessionId=RR423820220409134714119178
+url*http://[2409:8087:1a01:df::4077]/PLTV/88888888/224/3221225981/index.m3u8
+url*http://58.57.40.22:9901/tsfile/live/1039_1.m3u8
