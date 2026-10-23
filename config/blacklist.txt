@@ -4382,3 +4382,17 @@ url*http://59.39.89.130:60901/tsfile/live/0010_1.m3u8?key=txiptv&playlive=1&auth
 url*http://106.39.160.155/live.aishang.ctlcdn.com/00000110240059_1/playlist.m3u8?CONTENTID=00000110240059_1&AUTHINFO=FABqh274XDn8fkurD5614t+1RvYajgx+a3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom+XaXZYzB/QfYjeYzGgKhP/do+Xpr4quVxlkA+ubKvbU1XwJFRgrbX+nTs60JauQUrav8kLj/PH8LxkDFpzvkq75UfeY/VNDZygRZLw4j+Xtwhj/IuXf1hJAU0X+heT7g==&USERTOKEN=eHKuwve/35NVIR5qsO5XsuB0O2BhR0KR
 url*http://204.12.221.218:8181/3m1080p/haws.m3u8
 url*http://gslbmgsplive.miguvideo.com/envivo_x/SD/lvyou/711/index.m3u8?msisdn=4cb2656dc09a7a6a8ce73f04371da0aa&mdspid=&spid=600633&netType=0&sid=5910022165&pid=2028597139&timestamp=20261021115042&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=947472502&ParentNodeID=-99&assertID=5910022165&client_ip=39.103.188.159&SecurityKey=20261021115042&promotionId=&mvid=5900004359&mcid=500020&playurlVersion=WX-A1-9.10.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=af024c119ab84341c7fb1ac7aa82f4fd&ddCalcu=daffv40af2z24a8ca1a179caab18b4f374c1&sv=10004&ct=android
+
+# 自动测速检测失效链接 url|auto_bad
+url*https://live.mxdyeah.top/live.php?id=jilinHD
+url*http://192.151.150.154/live/cctv14hd.m3u8
+url*http://[2409:8087:3428:20:500::100f]:6610/PLTV/88888888/224/3221227099/index.m3u8?servicetype=1&IASHttpSessionId=RR423820220409134714119178
+url*http://204.12.221.218:8181/3m1080p/jlws.m3u8
+url*http://120.196.232.124:8088/000000001001PLTV/651/224/3221227582/1.m3u8?HlsProfileId=
+url*http://36.32.174.67:60080/newlive/live/hls/46/live.m3u8
+url*http://fn.gcl.de5.net:5908/gsh950428/947472500
+url*http://43.152.25.217:80/tencent.live.cbncdn.cn/__cl/cg:live/__c/hainanSD/__op/default/__f/index.m3u8
+url*http://192.151.150.154/live/cctv15hd.m3u8
+url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=b9671fadaf6cf699b394b443d52d490b&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20261021115046&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.182.111&SecurityKey=20261021115046&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.10.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=792121890b64ec4a274e52d3d2da0165&ddCalcu=5769v12a01la2ad128d930db2654ee4c742a&sv=10004&ct=android
+url*http://107.150.60.122/live/jlwshd.m3u8
+url*http://198.204.228.26/live/cctv1hd.m3u8
