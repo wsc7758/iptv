@@ -4396,3 +4396,7 @@ url*http://192.151.150.154/live/cctv15hd.m3u8
 url*http://gslbmgsplive.miguvideo.com/migu/kailu/nxjj/51/20251225/index.m3u8?msisdn=b9671fadaf6cf699b394b443d52d490b&mdspid=&spid=600697&netType=0&sid=5910022409&pid=2028597139&timestamp=20261021115046&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=738906901&ParentNodeID=-99&assertID=5910022409&client_ip=39.103.182.111&SecurityKey=20261021115046&promotionId=&mvid=5900004349&mcid=500020&playurlVersion=WX-A1-9.10.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=792121890b64ec4a274e52d3d2da0165&ddCalcu=5769v12a01la2ad128d930db2654ee4c742a&sv=10004&ct=android
 url*http://107.150.60.122/live/jlwshd.m3u8
 url*http://198.204.228.26/live/cctv1hd.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://125.93.74.27:9002/tsfile/live/0012_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://58.57.40.22:9901/tsfile/live/1004_1.m3u8
