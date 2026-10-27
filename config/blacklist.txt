@@ -4420,3 +4420,6 @@ url*http://101.66.194.176:9901/tsfile/live/0124_1.m3u8?key=txiptv&playlive=0&aut
 url*http://101.66.194.176:9901/tsfile/live/0119_1.m3u8?key=txiptv&playlive=0&authid=0
 url*http://101.66.194.176:9901/tsfile/live/0118_1.m3u8?key=txiptv&playlive=0&authid=0
 url*http://101.66.194.176:9901/tsfile/live/0113_1.m3u8?key=txiptv&playlive=0&authid=0
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://198.204.228.26/live/cctv11hd.m3u8
