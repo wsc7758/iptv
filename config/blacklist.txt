@@ -4431,3 +4431,13 @@ url*http://bztv.tvbus.cc:8081/cdnlive/cctv5.m3u8
 url*http://dbiptv.sn.chinamobile.com/PLTV/88888890/224/3221225769/index.m3u8
 url*https://live.264788.xyz/channel/sichuanweishi4k?streamid=401bf692a1a8b91298f26077d53316d6&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
 url*https://live.264788.xyz/channel/neimengguweishi?streamid=81a015dbecf3031d7d847b7a9b059f67&livekey=01WgOR41rriMmMkzNsd0UoaxJRwetZdxIvtVk
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://222.134.245.16:9901/tsfile/live/0121_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://222.134.245.16:9901/tsfile/live/0107_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://sh.lnott.top:880/dx58.m3u8
+url*http://222.134.245.16:9901/tsfile/live/0127_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://113.98.11.46:3000/644368373
+url*http://222.134.245.16:9901/tsfile/live/0124_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://dbiptv.sn.chinamobile.com/PLTV/88888888/224/3221227201/index.m3u8
+url*http://113.98.11.46:3000/644368714
