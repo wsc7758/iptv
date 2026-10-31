@@ -4449,3 +4449,6 @@ url*http://gfr.x3322.net:9901/tsfile/live/1072_1.m3u8
 url*http://gslbmgsplive.miguvideo.com/envivo_v/2018/SD/jilin/1000/index.m3u8?msisdn=f8a03e4833038ebc7581a75bf6261bd0&mdspid=&spid=600633&netType=0&sid=5910022164&pid=2028597139&timestamp=20261021115042&Channel_ID=0116_2600034600-99000-201600010010028&ProgramID=947472500&ParentNodeID=-99&assertID=5910022164&client_ip=39.103.182.111&SecurityKey=20261021115042&promotionId=&mvid=5900004357&mcid=500020&playurlVersion=WX-A1-9.10.1-SNAPSHOT&userid=&jmhm=&videocodec=h264&appCode=miguvideo_android&bean=mgspad&tid=android&conFee=0&puData=b2795ddaf69843e2eb93470cb0cb80f1&ddCalcu=1bf2v07a89zb5acd0dbacf0679483493bee2&sv=10004&ct=android
 url*http://222.86.13.51:9999/rtp/235.254.198.39:1432
 url*http://43.152.25.114:80/tencent.live.cbncdn.cn/__cl/cg:live/__c/jilinHD/__op/default/__f/index.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://hlsal-ldvt.qing.mgtv.com/nn_live/nn_x64/dWlwPTEyNy4wLjAuMSZ1aWQ9cWluZy1jbXMmbm5fdGltZXpvbmU9OCZjZG5leF9pZD1hbF9obHNfbGR2dCZ1dWlkPTliODY4NmU5ZTM2YzYwMmMmZT02OTE0NjA0JnY9MSZpZD1ITldTWkdTVCZzPTcwN2RiYTc2YzJjNmJmMTQ4MmUyZGYzOWU2NWM3YWFi/HNWSZGST.m3u8
