@@ -4452,3 +4452,13 @@ url*http://43.152.25.114:80/tencent.live.cbncdn.cn/__cl/cg:live/__c/jilinHD/__op
 
 # 自动测速检测失效链接 url|auto_bad
 url*http://hlsal-ldvt.qing.mgtv.com/nn_live/nn_x64/dWlwPTEyNy4wLjAuMSZ1aWQ9cWluZy1jbXMmbm5fdGltZXpvbmU9OCZjZG5leF9pZD1hbF9obHNfbGR2dCZ1dWlkPTliODY4NmU5ZTM2YzYwMmMmZT02OTE0NjA0JnY9MSZpZD1ITldTWkdTVCZzPTcwN2RiYTc2YzJjNmJmMTQ4MmUyZGYzOWU2NWM3YWFi/HNWSZGST.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://hls1.avap.jilintv.cn/zqvk7vpj/channel/0533b55e42354f4f802bdec78e26b571/1.m3u8
+url*http://112.46.85.60:8009/hls/502/index.m3u8
+url*http://1.94.31.214/php/py/k-web/ku9/py/socks5.py?ip=111.43.114.137:1080&u=http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226397/index.m3u8
+url*http://php.jdshipin.com/TVOD/hljyd.php?id=3221226397
+url*http://58.57.40.22:9901/tsfile/live/1050_1.m3u8
+url*http://bztv.tvbus.cc:8081/cdnlive/cctv9.m3u8
+url*http://sh.lnott.top:880/dx37.m3u8
+url*http://112.46.85.60:8009/hls/31/index.m3u8
