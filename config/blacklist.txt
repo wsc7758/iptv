@@ -4474,3 +4474,11 @@ url*http://204.12.221.218:8181/3m1080p/cctv7.m3u8
 url*http://107.150.60.122/live/ynwshd.m3u8
 url*http://43.152.25.217:80/tencent.live.cbncdn.cn/__cl/cg:live/__c/jilinHD/__op/default/__f/index.m3u8
 url*https://zby.130519.xyz/PLTV/11/224/3221226149/index.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://120.196.232.124:8088/000000001001PLTV/651/224/3221227618/1.m3u8?HlsProfileId=
+url*http://nn.7x9d.cn/地方台8563/海南.php?id=hnws&?key=txiptv
+url*http://221.7.175.154:8445/tsfile/live/1014_1.m3u8?key=txiptv&playlive=1&authid=0
+url*http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226397/index.m3u8
+url*http://39.134.67.108/PLTV/88888888/224/3221226013/1.m3u8
+url*http://111.225.95.13:8800/hls/51/index.m3u8
