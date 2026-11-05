@@ -4482,3 +4482,15 @@ url*http://221.7.175.154:8445/tsfile/live/1014_1.m3u8?key=txiptv&playlive=1&auth
 url*http://ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221226397/index.m3u8
 url*http://39.134.67.108/PLTV/88888888/224/3221226013/1.m3u8
 url*http://111.225.95.13:8800/hls/51/index.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://198.204.228.26/live/cctv6hd.m3u8
+url*http://204.12.221.218:8181/3m1080p/cctv8.m3u8
+url*http://198.204.228.26/live/cctv15hd.m3u8
+url*http://106.39.160.155/live.aishang.ctlcdn.com/00000110240046_1/playlist.m3u8?CONTENTID=00000110240046_1&AUTHINFO=FABqh274XDn8fkurD5614t+1RvYajgx+a3PxUJe1SMO4OjrtFitM6ZQbSJEFffaD35hOAhZdTXOrK0W8QvBRom+XaXZYzB/QfYjeYzGgKhP/do+Xpr4quVxlkA+ubKvbU1XwJFRgrbX+nTs60JauQUrav8kLj/PH8LxkDFpzvkq75UfeY/VNDZygRZLw4j+Xtwhj/IuXf1hJAU0X+heT7g==&USERTOKEN=eHKuwve/35NVIR5qsO5XsuB0O2BhR0KR
+url*http://dbiptv.sn.chinamobile.com/PLTV/88888890/224/3221225792/index.m3u8
+url*http://207.56.13.146:81/cdnlive/cctv7.m3u8
+url*http://107.150.60.122/live/cctv10hd.m3u8
+url*http://tvbox6.icu/tv/migu.php?id=jlws
+url*http://cssbyd.imwork.net:8082/hls/31/index.m3u8
+url*http://207.56.13.146:81/cdnlive/cctv16.m3u8
