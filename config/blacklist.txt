@@ -4494,3 +4494,11 @@ url*http://107.150.60.122/live/cctv10hd.m3u8
 url*http://tvbox6.icu/tv/migu.php?id=jlws
 url*http://cssbyd.imwork.net:8082/hls/31/index.m3u8
 url*http://207.56.13.146:81/cdnlive/cctv16.m3u8
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://61.136.172.236:9901/tsfile/live/0010_1.m3u8
+url*http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225646/2/index.m3u8
+url*http://[2409:8087:1a01:df::4077]/ottrrs.hl.chinamobile.com/PLTV/88888888/224/3221225734/index.m3u8
+url*http://[2409:8087:7000:20:1000::22]:6060/yinhe/2/ch00000090990000001294/index.m3u8?virtualDomain=yinhe.live_hls.zte.com
+url*http://[2409:8087:3869:8021:1001::e5]:6610/PLTV/88888888/224/3221225626/2/index.m3u8
+url*http://[2409:8087:1e03:21::2]:6060/cms001/ch00000090990000001237/index.m3u8
