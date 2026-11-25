@@ -4782,3 +4782,7 @@ url*http://116.52.173.168:1234/641886773
 url*http://27.12.12.40:1234/644368373
 url*http://27.12.12.40:1234/644368714
 url*http://116.52.173.168:1234/608807420
+
+# 自动测速检测失效链接 url|auto_bad
+url*http://61.136.172.236:9901/tsfile/live/0117_1.m3u8
+url*https://piccpndali.v.myalicdn.com/audio/cctv6_2.m3u8
